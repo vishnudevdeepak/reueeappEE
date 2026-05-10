@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Checkout – ReuseMart</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="transition.css">
+<style>
+:root {
+  --green: #27ae60;
+  --green-light: #2ecc71;
+  --green-dark: #1e8449;
+  --green-pale: #eafaf1;
+  --green-mid: #d5f5e3;
+  --red: #e74c3c;
+  --orange: #f39c12;
+  --bg: #f4f8f6;
+  --text: #1a2e22;
+  --muted: #6b8f78;
+  --border: rgba(39,174,96,0.12);
+  --card-shadow: 0 8px 32px rgba(39,174,96,0.10);
+}
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { background: var(--bg); font-family: 'DM Sans', sans-serif; color: var(--text); min-height: 100vh; overflow-x: hidden; }
+
+/* ── SCROLL PROGRESS ── */
+.scroll-progress {
+  position: fixed; top: 0; left: 0; height: 3px; width: 0%;
+  background: linear-gradient(90deg, #27ae60, #2ecc71);
+  z-index: 9999; transition: width 0.05s linear;
+  box-shadow: 0 0 8px rgba(39,174,96,0.6);
+}
+
+/* ── NAVBAR ── */
+.navbar {
+  background: rgba(255,255,255,0.88); backdrop-filter: blur(14px);
+  padding: 0 60px; height: 68px;
+  display: flex; justify-content: space-between; align-items: center;
+  position: sticky; top: 0; z-index: 200;
+  border-bottom: 1px solid var(--border);
+  box-shadow: 0 2px 24px rgba(39,174,96,0.07);
+  animation: slideInTop 0.7s cubic-bezier(0.22,1,0.36,1) both;
+}
+@keyframes slideInTop { from { transform: translateY(-60px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+.logo h2 { font-family: 'Playfair Display', serif; color: var(--green-dark); font-size: 22px; letter-spacing: -0.5px; cursor: pointer; }
+.back-btn {
+  display: flex; align-items: center; gap: 7px;
+  background: var(--green-pale); border: 1.5px solid var(--green-mid);
+  color: var(--green-dark); padding: 8px 18px; border-radius: 10px;
+  font-size: 13px; font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif;
+  transition: all 0.22s;
+}
+.back-btn:hover { background: var(--green-mid); transform: translateX(-2px); }
+
+/* ── PAGE HEADER ── */
+.page-header {
+  background: linear-gradient(135deg, #0d3320 0%, #1e6b3c 55%, #27ae60 100%);
+  padding: 48px 60px 40px; position: relative; overflow: hidden;
+  animation: fadeUp 0.7s cubic-bezier(.22,.68,0,1.2) 0.1s both;
+}
+.page-header-grid {
+  position: absolute; inset: 0;
+  background-image: linear-gradient(rgba(46,204,113,0.06) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(46,204,113,0.06) 1px, transparent 1px);
+  background-size: 50px 50px; pointer-events: none;
+}
+.page-header::before { content: ""; position: absolute; width: 320px; height: 320px; border-radius: 50%; background: white; opacity: 0.07; top: -100px; left: -70px; pointer-events: none; }
+.page-header::after  { content: ""; position: absolute; width: 240px; height: 240px; border-radius: 50%; background: white; opacity: 0.07; bottom: -80px; right: -50px; pointer-events: none; }
+.page-header-inner { position: relative; }
+.page-tag { display: inline-flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.20); padding: 5px 14px; border-radius: 100px; font-size: 12px; color: rgba(255,255,255,0.85); font-weight: 500; letter-spacing: 0.05em; margin-bottom: 14px; }
+.page-header h1 { font-family: 'Playfair Display', serif; font-size: clamp(26px,4vw,38px); color: white; letter-spacing: -0.5px; margin-bottom: 6px; }
+.page-header p { color: rgba(255,255,255,0.60); font-size: 15px; font-weight: 300; }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(22px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ── LAYOUT ── */
+.checkout-wrap {
+  max-width: 1060px; margin: 0 auto;
+  padding: 44px 60px 80px;
+  display: grid; grid-template-columns: 1fr 380px; gap: 32px; align-items: start;
+}
+
+/* ── FORM CARD ── */
+.form-card {
+  background: white; border-radius: 20px;
+  box-shadow: var(--card-shadow); border: 1px solid rgba(39,174,96,0.07);
+  overflow: hidden;
+  animation: fadeUp 0.65s cubic-bezier(.22,.68,0,1.2) 0.2s both;
+}
+.form-section-header {
+  display: flex; align-items: center; gap: 12px;
+  padding: 20px 28px 16px;
+  border-bottom: 1px solid rgba(39,174,96,0.08);
+}
+.form-section-icon {
+  width: 38px; height: 38px; border-radius: 10px;
+  background: var(--green-pale); border: 1.5px solid var(--green-mid);
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.form-section-icon svg { width: 18px; height: 18px; stroke: var(--green-dark); fill: none; stroke-width: 2; }
+.form-section-title { font-size: 15px; font-weight: 700; color: var(--text); }
+.form-section-sub { font-size: 12px; color: var(--muted); font-weight: 400; }
+.form-body { padding: 24px 28px; }
+.field-group { display: grid; gap: 18px; }
+.field-row-2 { grid-template-columns: 1fr 1fr; }
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field label { font-size: 12px; font-weight: 600; color: var(--green-dark); letter-spacing: 0.04em; text-transform: uppercase; }
+.field input, .field select, .field textarea {
+  padding: 11px 14px; border-radius: 11px;
+  border: 1.5px solid rgba(39,174,96,0.18);
+  font-size: 14px; font-family: 'DM Sans', sans-serif; color: var(--text);
+  background: var(--bg); transition: border 0.22s, box-shadow 0.22s, background 0.2s; outline: none;
+}
+.field input:focus, .field select:focus, .field textarea:focus {
+  border-color: var(--green); background: white;
+  box-shadow: 0 0 0 3px rgba(39,174,96,0.10);
+}
+.field input::placeholder, .field textarea::placeholder { color: #aac2b5; }
+.field input.error { border-color: var(--red); box-shadow: 0 0 0 3px rgba(231,76,60,0.08); }
+.field-error { font-size: 11px; color: var(--red); font-weight: 500; display: none; }
+.field-error.show { display: block; }
+.field textarea { resize: vertical; min-height: 80px; }
+.field select { cursor: pointer; }
+.form-separator { height: 1px; background: rgba(39,174,96,0.08); margin: 6px 0; }
+
+/* ── ORDER SUMMARY ── */
+.summary-card {
+  background: white; border-radius: 20px;
+  box-shadow: var(--card-shadow); border: 1px solid rgba(39,174,96,0.07);
+  overflow: hidden; position: sticky; top: 88px;
+  animation: fadeUp 0.65s cubic-bezier(.22,.68,0,1.2) 0.35s both;
+}
+.summary-header {
+  padding: 20px 24px 16px; border-bottom: 1px solid rgba(39,174,96,0.08);
+  font-family: 'Playfair Display', serif; font-size: 17px; color: var(--text);
+}
+.summary-item {
+  display: flex; align-items: flex-start; gap: 14px; padding: 16px 24px;
+  border-bottom: 1px solid rgba(39,174,96,0.07);
+}
+.summary-img { width: 56px; height: 56px; border-radius: 10px; object-fit: cover; flex-shrink: 0; background: var(--green-pale); }
+.summary-info { flex: 1; min-width: 0; }
+.summary-info h5 { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 4px; line-height: 1.3; }
+.summary-info .unit-price { font-size: 12px; color: var(--muted); margin-bottom: 10px; }
+
+/* ── QUANTITY CONTROL ── */
+.qty-row {
+  display: flex; align-items: center; gap: 0;
+  background: var(--bg); border: 1.5px solid rgba(39,174,96,0.20);
+  border-radius: 10px; overflow: hidden; width: fit-content;
+}
+.qty-btn {
+  width: 34px; height: 34px; border: none; background: transparent;
+  cursor: pointer; font-size: 18px; font-weight: 600; color: var(--green-dark);
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.18s, color 0.18s;
+  font-family: 'DM Sans', sans-serif; flex-shrink: 0;
+}
+.qty-btn:hover { background: var(--green-pale); color: var(--green); }
+.qty-btn:active { background: var(--green-mid); }
+.qty-display {
+  min-width: 38px; text-align: center; font-size: 15px; font-weight: 700;
+  color: var(--text); border-left: 1px solid rgba(39,174,96,0.15);
+  border-right: 1px solid rgba(39,174,96,0.15); padding: 0 6px;
+  line-height: 34px; user-select: none;
+}
+.qty-label { font-size: 11px; font-weight: 600; color: var(--green-dark); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
+
+.line-price {
+  font-family: 'Playfair Display', serif; font-size: 15px;
+  color: var(--green); font-weight: 700; margin-top: 10px;
+}
+
+.summary-rows { padding: 14px 24px; display: flex; flex-direction: column; gap: 9px; }
+.summary-row { display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); }
+.summary-row.total { font-size: 16px; font-weight: 700; color: var(--text); border-top: 1px solid rgba(39,174,96,0.12); padding-top: 12px; margin-top: 4px; }
+.summary-row.total span:last-child { color: var(--green); font-family: 'Playfair Display', serif; font-size: 18px; }
+
+.empty-checkout { padding: 32px 24px; text-align: center; color: var(--muted); }
+.empty-checkout p { font-size: 14px; margin-bottom: 14px; }
+.empty-checkout a { color: var(--green); font-weight: 600; text-decoration: none; }
+
+/* ── CONFIRM BUTTON ── */
+.confirm-wrap { padding: 20px 24px; border-top: 1px solid rgba(39,174,96,0.08); }
+.btn-confirm {
+  width: 100%; padding: 15px; border: none; border-radius: 13px;
+  background: linear-gradient(135deg, #1e8449, #27ae60, #2ecc71);
+  color: white; font-size: 15px; font-weight: 700; font-family: 'DM Sans', sans-serif;
+  cursor: pointer; letter-spacing: 0.3px;
+  box-shadow: 0 6px 20px rgba(39,174,96,0.38);
+  transition: all 0.28s cubic-bezier(.22,.68,0,1.2);
+  position: relative; overflow: hidden;
+  display: flex; align-items: center; justify-content: center; gap: 9px;
+}
+.btn-confirm::before {
+  content: ""; position: absolute; inset: 0;
+  background: linear-gradient(120deg, transparent, rgba(255,255,255,0.25), transparent);
+  transform: translateX(-100%) skewX(-20deg);
+}
+.btn-confirm:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 10px 28px rgba(39,174,96,0.50); }
+.btn-confirm:hover::before { animation: shine 0.7s forwards; }
+@keyframes shine { 100% { transform: translateX(180%) skewX(-20deg); } }
+.btn-confirm:active { transform: scale(0.98); }
+.btn-confirm svg { width: 18px; height: 18px; stroke: white; fill: none; stroke-width: 2.5; flex-shrink: 0; }
+
+/* ── SUCCESS OVERLAY ── */
+.success-overlay {
+  position: fixed; inset: 0; z-index: 999;
+  background: rgba(13,51,32,0.85); backdrop-filter: blur(8px);
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none; transition: opacity 0.4s;
+}
+.success-overlay.show { opacity: 1; pointer-events: all; }
+.success-box {
+  background: white; border-radius: 24px; padding: 48px 44px; text-align: center;
+  max-width: 380px; width: 90%;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.25);
+  transform: scale(0.85); transition: transform 0.4s cubic-bezier(.22,.68,0,1.2);
+}
+.success-overlay.show .success-box { transform: scale(1); }
+.success-circle {
+  width: 80px; height: 80px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--green), var(--green-light));
+  margin: 0 auto 20px;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 10px 30px rgba(39,174,96,0.40);
+  animation: popIn 0.5s cubic-bezier(.22,.68,0,1.2) 0.2s both;
+}
+@keyframes popIn { from { transform: scale(0); } to { transform: scale(1); } }
+.success-circle svg { width: 38px; height: 38px; stroke: white; fill: none; stroke-width: 3; }
+.success-box h2 { font-family: 'Playfair Display', serif; font-size: 26px; color: var(--text); margin-bottom: 8px; }
+.success-box p { font-size: 14px; color: var(--muted); font-weight: 400; line-height: 1.6; margin-bottom: 28px; }
+.btn-success-go {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: linear-gradient(135deg, var(--green), var(--green-light));
+  color: white; border: none; padding: 13px 28px; border-radius: 12px;
+  font-size: 14px; font-weight: 700; cursor: pointer; font-family: 'DM Sans', sans-serif;
+  box-shadow: 0 6px 18px rgba(39,174,96,0.35); transition: all 0.22s;
+}
+.btn-success-go:hover { transform: translateY(-2px); box-shadow: 0 10px 26px rgba(39,174,96,0.45); }
+
+/* ── TOAST ── */
+.toast { position: fixed; bottom: 30px; right: 30px; background: var(--text); color: white; padding: 14px 22px; border-radius: 12px; font-size: 14px; font-weight: 500; box-shadow: 0 10px 30px rgba(0,0,0,0.22); transform: translateY(80px); opacity: 0; transition: all 0.35s cubic-bezier(.22,.68,0,1.2); z-index: 9999; display: flex; align-items: center; gap: 10px; }
+.toast.show { transform: translateY(0); opacity: 1; }
+.toast-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--red); flex-shrink: 0; }
+
+@media (max-width: 860px) {
+  .navbar { padding: 0 20px; }
+  .page-header { padding: 36px 20px 30px; }
+  .checkout-wrap { grid-template-columns: 1fr; padding: 24px 20px 60px; }
+  .summary-card { position: static; order: -1; }
+  .field-row-2 { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="scroll-progress" id="scrollProgress"></div>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <div class="logo"><h2 onclick="navigateTo('home.html')">ReuseMart</h2></div>
+  <button class="back-btn" onclick="goBack()">
+    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+    Back to Cart
+  </button>
+</nav>
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+  <div class="page-header-grid"></div>
+  <div class="page-header-inner">
+    <div class="page-tag">
+      <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/><path d="M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z"/></svg>
+      Secure Checkout
+    </div>
+    <h1>Fill in Your Details</h1>
+    <p>Complete your purchase in just a few steps</p>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="checkout-wrap">
+
+  <!-- LEFT: FORM -->
+  <div class="form-card">
+
+    <!-- Personal Info -->
+    <div class="form-section-header">
+      <div class="form-section-icon">
+        <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      </div>
+      <div>
+        <div class="form-section-title">Personal Information</div>
+        <div class="form-section-sub">Your contact details</div>
+      </div>
+    </div>
+    <div class="form-body">
+      <div class="field-group">
+        <div class="field-group field-row-2">
+          <div class="field">
+            <label>First Name</label>
+            <input type="text" id="firstName" placeholder="Arjun">
+            <span class="field-error" id="err-firstName">Please enter your first name.</span>
+          </div>
+          <div class="field">
+            <label>Last Name</label>
+            <input type="text" id="lastName" placeholder="Menon">
+            <span class="field-error" id="err-lastName">Please enter your last name.</span>
+          </div>
+        </div>
+        <div class="field">
+          <label>Email Address</label>
+          <input type="email" id="email" placeholder="arjun@example.com">
+          <span class="field-error" id="err-email">Please enter a valid email.</span>
+        </div>
+        <div class="field">
+          <label>Phone Number</label>
+          <input type="tel" id="phone" placeholder="+91 98765 43210" maxlength="15">
+          <span class="field-error" id="err-phone">Please enter a valid phone number.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-separator"></div>
+
+    <!-- Shipping -->
+    <div class="form-section-header">
+      <div class="form-section-icon">
+        <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      </div>
+      <div>
+        <div class="form-section-title">Delivery Address</div>
+        <div class="form-section-sub">Where should we send it?</div>
+      </div>
+    </div>
+    <div class="form-body">
+      <div class="field-group">
+        <div class="field">
+          <label>Street Address</label>
+          <input type="text" id="street" placeholder="14, MG Road, Near Bus Stand">
+          <span class="field-error" id="err-street">Please enter your address.</span>
+        </div>
+        <div class="field-group field-row-2">
+          <div class="field">
+            <label>City</label>
+            <input type="text" id="city" placeholder="Thrissur">
+            <span class="field-error" id="err-city">Please enter your city.</span>
+          </div>
+          <div class="field">
+            <label>State</label>
+            <input type="text" id="state" placeholder="Kerala">
+            <span class="field-error" id="err-state">Please enter your state.</span>
+          </div>
+        </div>
+        <div class="field-group field-row-2">
+          <div class="field">
+            <label>PIN Code</label>
+            <input type="text" id="pin" placeholder="680001" maxlength="6">
+            <span class="field-error" id="err-pin">Please enter a valid 6-digit PIN.</span>
+          </div>
+          <div class="field">
+            <label>Country</label>
+            <select id="country">
+              <option value="India" selected>India</option>
+              <option value="USA">USA</option>
+              <option value="UK">UK</option>
+              <option value="Australia">Australia</option>
+              <option value="Canada">Canada</option>
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label>Delivery Notes (optional)</label>
+          <textarea id="notes" placeholder="Any special delivery instructions…"></textarea>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- RIGHT: ORDER SUMMARY -->
+  <div class="summary-card">
+    <div class="summary-header">Order Summary</div>
+
+    <div id="summaryItem"><!-- Populated by JS --></div>
+
+    <div class="summary-rows" id="summaryRows" style="display:none;">
+      <div class="summary-row"><span>Subtotal</span><span id="subTotal">₹0</span></div>
+      <div class="summary-row"><span>Delivery</span><span style="color:var(--green);font-weight:600;">Free</span></div>
+      <div class="summary-row"><span>Platform Fee</span><span>₹0</span></div>
+      <div class="summary-row total"><span>Total</span><span id="grandTotal">₹0</span></div>
+    </div>
+
+    <div class="confirm-wrap">
+      <button class="btn-confirm" onclick="confirmOrder()">
+        <svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg>
+        Confirm &amp; Place Order
+      </button>
+    </div>
+  </div>
+
+</div>
+
+<!-- SUCCESS OVERLAY -->
+<div class="success-overlay" id="successOverlay">
+  <div class="success-box">
+    <div class="success-circle">
+      <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+    </div>
+    <h2>Order Placed!</h2>
+    <p>Your purchase was successful. You can track your order from your profile.</p>
+    <button class="btn-success-go" onclick="goToProfile()">
+      Go to Profile
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <div class="toast-dot"></div>
+  <span id="toastMsg">Error</span>
+</div>
+
+<script>
+/* ── STATE ── */
+let quantity = 1;
+let unitPrice = 0;
+
+/* ── LOAD ITEM FROM LOCALSTORAGE ── */
+const checkoutItem  = JSON.parse(localStorage.getItem("checkoutItem"))  || null;
+const checkoutIndex = parseInt(localStorage.getItem("checkoutItemIndex") ?? "-1");
+
+function updateTotals() {
+  const total = unitPrice * quantity;
+  document.getElementById("subTotal").textContent   = "₹" + total.toLocaleString('en-IN');
+  document.getElementById("grandTotal").textContent  = "₹" + total.toLocaleString('en-IN');
+  const lp = document.getElementById("linePrice");
+  if (lp) lp.textContent = "₹" + total.toLocaleString('en-IN');
+  const qd = document.getElementById("qtyDisplay");
+  if (qd) qd.textContent = quantity;
+}
+
+function changeQty(delta) {
+  quantity = Math.max(1, quantity + delta);
+  updateTotals();
+}
+
+function loadSummary() {
+  const si = document.getElementById("summaryItem");
+  const sr = document.getElementById("summaryRows");
+
+  if (!checkoutItem) {
+    si.innerHTML = `<div class="empty-checkout">
+      <p>No item selected. <a href="dashboard.html">← Back to cart</a></p>
+    </div>`;
+    return;
+  }
+
+  unitPrice = parseInt(String(checkoutItem.price).replace(/[^0-9]/g, "")) || 0;
+
+  si.innerHTML = `
+    <div class="summary-item">
+      <img class="summary-img" src="${checkoutItem.image}" alt="${checkoutItem.name}"
+           onerror="this.src='https://via.placeholder.com/100x100/eafaf1/27ae60?text=Item'">
+      <div class="summary-info">
+        <h5>${checkoutItem.name}</h5>
+        <div class="unit-price">Unit price: ₹${unitPrice.toLocaleString('en-IN')}</div>
+        <div class="qty-label">Quantity</div>
+        <div class="qty-row">
+          <button class="qty-btn" onclick="changeQty(-1)" title="Decrease">−</button>
+          <div class="qty-display" id="qtyDisplay">1</div>
+          <button class="qty-btn" onclick="changeQty(1)" title="Increase">+</button>
+        </div>
+        <div class="line-price" id="linePrice">₹${unitPrice.toLocaleString('en-IN')}</div>
+      </div>
+    </div>`;
+
+  sr.style.display = "flex";
+  updateTotals();
+}
+
+/* ── VALIDATION ── */
+function showErr(id, show) {
+  const el  = document.getElementById("err-" + id);
+  const inp = document.getElementById(id);
+  if (!el || !inp) return;
+  el.classList.toggle("show", show);
+  if (show) inp.classList.add("error");
+  else inp.classList.remove("error");
+}
+
+function validate() {
+  let ok = true;
+  const req = x => x.value.trim() === "";
+  const fields = ["firstName","lastName","email","phone","street","city","state","pin"];
+  fields.forEach(f => { const bad = req(document.getElementById(f)); showErr(f, bad); if (bad) ok = false; });
+  const email = document.getElementById("email");
+  if (!email.value.includes("@")) { showErr("email", true); ok = false; }
+  const pin = document.getElementById("pin");
+  if (!/^\d{6}$/.test(pin.value.trim())) { showErr("pin", true); ok = false; }
+  return ok;
+}
+
+/* ── CONFIRM ORDER ── */
+function confirmOrder() {
+  if (!checkoutItem) { showToast("No item selected!"); return; }
+  if (!validate()) { showToast("Please fill in all required fields."); return; }
+
+  let cart   = JSON.parse(localStorage.getItem("cart"))   || [];
+  let bought = JSON.parse(localStorage.getItem("bought")) || [];
+
+  const orderItem = {
+    ...checkoutItem,
+    quantity,
+    totalPrice: unitPrice * quantity,
+    date: new Date().toLocaleString()
+  };
+
+  bought.push(orderItem);
+  if (checkoutIndex >= 0) cart.splice(checkoutIndex, 1);
+
+  localStorage.setItem("cart",   JSON.stringify(cart));
+  localStorage.setItem("bought", JSON.stringify(bought));
+  localStorage.removeItem("checkoutItem");
+  localStorage.removeItem("checkoutItemIndex");
+
+  document.getElementById("successOverlay").classList.add("show");
+}
+
+function goToProfile() { navigateTo('profile.html'); }
+
+/* ── TOAST ── */
+function showToast(msg) {
+  const t = document.getElementById("toast");
+  document.getElementById("toastMsg").textContent = msg;
+  t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 2400);
+}
+
+/* ── PRE-FILL ── */
+function prefill() {
+  const user = localStorage.getItem("loggedInUser");
+  if (user) { const fn = document.getElementById("firstName"); if (fn && !fn.value) fn.value = user; }
+}
+
+/* ── SCROLL PROGRESS ── */
+const progressBar = document.getElementById('scrollProgress');
+window.addEventListener('scroll', () => {
+  const scrollY = window.scrollY;
+  const docH    = document.documentElement.scrollHeight - window.innerHeight;
+  const pct     = docH > 0 ? (scrollY / docH) * 100 : 0;
+  progressBar.style.width = pct.toFixed(1) + '%';
+}, { passive: true });
+
+/* INIT */
+loadSummary();
+prefill();
+</script>
+<script src="transition.js"></script>
+</body>
+</html>

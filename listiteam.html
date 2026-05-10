@@ -1,0 +1,1291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>List an Item - ReuseMart</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="transition.css">
+
+<style>
+  .scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  width: 0%;
+  background: linear-gradient(90deg, #27ae60, #2ecc71);
+  z-index: 9999;
+  transition: width 0.05s linear;
+  box-shadow: 0 0 8px rgba(39, 174, 96, 0.6);
+}
+:root {
+  --green: #27ae60;
+  --green-light: #2ecc71;
+  --green-dark: #1e8449;
+  --green-pale: #eafaf1;
+  --green-mid: #d5f5e3;
+  --blue: #2980b9;
+  --blue-light: #3498db;
+  --blue-dark: #1a6391;
+  --blue-pale: #eaf4fb;
+  --blue-mid: #c8e4f5;
+  --bg: #f4f8f6;
+  --text: #1a2e22;
+  --muted: #6b8f78;
+  --card-shadow: 0 8px 32px rgba(39,174,96,0.10);
+  --error: #e74c3c;
+  --error-pale: #fdf0ef;
+}
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { background: var(--bg); font-family: 'DM Sans', sans-serif; color: var(--text); overflow-x: hidden; background: linear-gradient(135deg, #d4f5e9, #f4f8f6); }
+
+/* ── NAVBAR ── */
+.navbar {
+  background: rgba(255,255,255,0.25);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  padding: 0 60px;
+  height: 68px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  border-bottom: 1px solid rgba(255,255,255,0.3);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.05);
+}
+.logo h2 { font-family: 'Playfair Display', serif; color: var(--green-dark); font-size: 22px; letter-spacing: -0.5px; }
+
+.nav-links {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.nav-slider {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 36px;
+  background: var(--green-pale);
+  border-radius: 9px;
+  transition: left 0.32s cubic-bezier(.22,.68,0,1.2), width 0.32s cubic-bezier(.22,.68,0,1.2);
+  pointer-events: none;
+  z-index: 0;
+  border: 1px solid var(--green-mid);
+}
+.nav-links a {
+  position: relative; z-index: 1;
+  text-decoration: none; color: var(--muted); font-size: 14px; font-weight: 500;
+  padding: 7px 16px; border-radius: 9px; transition: color 0.22s; white-space: nowrap;
+  opacity: 0; transform: translateX(40px);
+  animation: itemSlide 0.6s ease forwards;
+}
+.nav-links a:nth-child(2) { animation-delay: 0.2s; }
+.nav-links a:nth-child(3) { animation-delay: 0.35s; }
+.nav-links a:nth-child(4) { animation-delay: 0.5s; }
+.nav-links a:nth-child(5) { animation-delay: 0.65s; }
+.nav-links a:nth-child(6) { animation-delay: 0.8s; }
+@keyframes itemSlide { to { opacity: 1; transform: translateX(0); } }
+.nav-links a:hover { color: var(--green-dark); }
+.nav-links a.active { color: var(--green-dark); font-weight: 600; }
+.nav-links a.cta { margin-left: 6px; background: transparent; color: var(--muted) !important; padding: 8px 20px; border-radius: 9px; box-shadow: none; font-weight: 600; }
+.nav-links a.cta:hover { color: var(--green-dark); }
+
+/* PAGE HEADER */
+.page-header {
+  background: linear-gradient(135deg, #0d3320 0%, #1e6b3c 55%, #27ae60 100%);
+  padding: 52px 60px 44px; position: relative; overflow: hidden;
+}
+.page-header-grid { position: absolute; inset: 0; background-image: linear-gradient(rgba(46,204,113,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(46,204,113,0.06) 1px, transparent 1px); background-size: 50px 50px; pointer-events: none; }
+.page-header::before { content: ""; position: absolute; width: 360px; height: 360px; border-radius: 50%; top: -120px; left: -80px; opacity: 0.10; background: white; pointer-events: none; }
+.page-header-inner { position: relative; max-width: 560px; animation: fadeUp 0.7s cubic-bezier(.22,.68,0,1.2) both; }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(22px); } to { opacity: 1; transform: translateY(0); } }
+.page-tag { display: inline-flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.20); padding: 5px 14px; border-radius: 100px; font-size: 12px; color: rgba(255,255,255,0.85); font-weight: 500; letter-spacing: 0.05em; margin-bottom: 14px; }
+.page-header h1 { font-family: 'Playfair Display', serif; font-size: clamp(28px, 4vw, 40px); color: white; letter-spacing: -0.5px; margin-bottom: 8px; }
+.page-header p { color: rgba(255,255,255,0.65); font-size: 15px; font-weight: 300; }
+
+/* TAB BAR */
+.tab-bar {
+  background: white; padding: 0 60px;
+  display: flex; gap: 4px;
+  border-bottom: 1px solid rgba(39,174,96,0.10);
+  box-shadow: 0 2px 12px rgba(39,174,96,0.05);
+  position: sticky; top: 68px; z-index: 150;
+  overflow-x: auto;
+}
+.tab-btn {
+  padding: 16px 22px; font-size: 14px; font-weight: 600; color: var(--muted);
+  background: none; border: none; cursor: pointer; position: relative;
+  transition: color 0.22s; margin: 0; width: auto; border-radius: 0; white-space: nowrap;
+}
+.tab-btn::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 3px; background: var(--green); border-radius: 3px 3px 0 0; transform: scaleX(0); transition: transform 0.22s; }
+.tab-btn.rent-tab::after { background: var(--blue); }
+.tab-btn.active { color: var(--green-dark); }
+.tab-btn.rent-tab.active { color: var(--blue-dark); }
+.tab-btn.active::after { transform: scaleX(1); }
+.tab-btn:hover { color: var(--green-dark); background: var(--green-pale); }
+.tab-btn.rent-tab:hover { color: var(--blue-dark); background: var(--blue-pale); }
+.tab-count { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; background: var(--green); color: white; border-radius: 50%; font-size: 11px; margin-left: 6px; }
+.tab-count.blue { background: var(--blue); }
+
+/* TAB PANELS */
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* LAYOUT */
+.main-layout { display: grid; grid-template-columns: 1fr 380px; gap: 28px; padding: 40px 60px 70px; max-width: 1200px; margin: 0 auto; align-items: start; }
+
+/* FORM CARD */
+.form-card { background: white; border-radius: 20px; box-shadow: var(--card-shadow); border: 1px solid rgba(39,174,96,0.07); overflow: hidden; animation: fadeUp 0.6s ease both; }
+.form-card.blue-card { border-color: rgba(41,128,185,0.10); box-shadow: 0 8px 32px rgba(41,128,185,0.10); }
+
+.form-card-header { background: var(--green-pale); border-bottom: 1px solid var(--green-mid); padding: 22px 28px; display: flex; align-items: center; gap: 12px; }
+.form-card-header.blue-header { background: var(--blue-pale); border-bottom-color: var(--blue-mid); }
+.form-card-header-icon { width: 40px; height: 40px; background: linear-gradient(135deg, var(--green), var(--green-light)); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; box-shadow: 0 4px 12px rgba(39,174,96,0.25); flex-shrink: 0; }
+.form-card-header-icon.blue-icon { background: linear-gradient(135deg, var(--blue), var(--blue-light)); box-shadow: 0 4px 12px rgba(41,128,185,0.25); }
+.form-card-header h3 { font-family: 'Playfair Display', serif; font-size: 18px; color: var(--text); }
+.form-card-header p { font-size: 13px; color: var(--muted); margin-top: 2px; }
+.form-body { padding: 28px; }
+
+/* STEPS */
+.steps { display: flex; align-items: center; margin-bottom: 30px; }
+.step { display: flex; align-items: center; gap: 8px; }
+.step-num { width: 28px; height: 28px; border-radius: 50%; background: var(--green-mid); color: var(--green-dark); font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.3s; }
+.step.active .step-num { background: var(--green); color: white; box-shadow: 0 3px 10px rgba(39,174,96,0.35); }
+.step.done .step-num { background: var(--green-dark); color: white; }
+.blue-steps .step-num { background: var(--blue-mid); color: var(--blue-dark); }
+.blue-steps .step.active .step-num { background: var(--blue); box-shadow: 0 3px 10px rgba(41,128,185,0.35); }
+.blue-steps .step.done .step-num { background: var(--blue-dark); color: white; }
+.step-label { font-size: 12px; color: var(--muted); font-weight: 500; white-space: nowrap; }
+.step.active .step-label { color: var(--green-dark); font-weight: 600; }
+.blue-steps .step.active .step-label { color: var(--blue-dark); }
+.step-line { flex: 1; height: 2px; background: var(--green-mid); margin: 0 8px; border-radius: 2px; transition: background 0.3s; }
+.step-line.done { background: var(--green); }
+.blue-steps .step-line { background: var(--blue-mid); }
+.blue-steps .step-line.done { background: var(--blue); }
+
+/* FORM SECTIONS */
+.form-section { display: none; }
+.form-section.active { display: block; animation: fadeUp 0.4s ease both; }
+.section-label { font-size: 11px; font-weight: 700; letter-spacing: 0.10em; text-transform: uppercase; color: var(--green); margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+.section-label.blue-label { color: var(--blue); }
+.section-label::after { content: ''; flex: 1; height: 1px; background: var(--green-mid); }
+.section-label.blue-label::after { background: var(--blue-mid); }
+
+/* FIELDS */
+.field { margin-bottom: 20px; }
+.field label { display: block; font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 7px; }
+.field label span { color: var(--error); margin-left: 2px; }
+.field input, .field select, .field textarea {
+  width: 100%; padding: 11px 14px; border-radius: 10px;
+  border: 1.5px solid rgba(39,174,96,0.18);
+  font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--text);
+  background: var(--bg); outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+}
+.field input:focus, .field select:focus, .field textarea:focus { border-color: var(--green); box-shadow: 0 0 0 3px rgba(39,174,96,0.10); background: white; }
+.blue-form .field input:focus, .blue-form .field select:focus, .blue-form .field textarea:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(41,128,185,0.10); }
+.field input::placeholder, .field textarea::placeholder { color: var(--muted); font-weight: 300; }
+.field textarea { resize: vertical; min-height: 100px; line-height: 1.6; }
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.field-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+.field-hint { font-size: 12px; color: var(--muted); margin-top: 5px; }
+.field.error input, .field.error select, .field.error textarea { border-color: var(--error); background: var(--error-pale); }
+.field-error-msg { font-size: 12px; color: var(--error); margin-top: 5px; display: none; }
+.field.error .field-error-msg { display: block; }
+
+/* PRICE INPUT */
+.price-input-wrap { position: relative; }
+.price-prefix { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); font-weight: 900; font-size: 16px; color: var(--green-dark); pointer-events: none; }
+.blue-form .price-prefix { color: var(--blue-dark); }
+.price-input-wrap input { padding-left: 30px; }
+
+/* UPLOAD */
+.upload-zone { border: 2px dashed rgba(39,174,96,0.30); border-radius: 14px; background: var(--green-pale); padding: 32px 20px; text-align: center; cursor: pointer; transition: all 0.25s; position: relative; }
+.upload-zone:hover, .upload-zone.drag-over { border-color: var(--green); background: var(--green-mid); transform: scale(1.01); }
+.blue-form .upload-zone { border-color: rgba(41,128,185,0.30); background: var(--blue-pale); }
+.blue-form .upload-zone:hover, .blue-form .upload-zone.drag-over { border-color: var(--blue); background: var(--blue-mid); }
+.upload-zone input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; border: none; background: none; padding: 0; }
+.upload-zone input[type="file"]:focus { box-shadow: none; }
+.upload-icon { margin-bottom: 10px; }
+.upload-icon svg { width: 40px; height: 40px; stroke: var(--green); opacity: 0.7; }
+.blue-form .upload-icon svg { stroke: var(--blue); }
+.upload-title { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+.upload-sub { font-size: 13px; color: var(--muted); }
+.image-preview-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 10px; margin-top: 14px; }
+.preview-thumb { position: relative; border-radius: 10px; overflow: hidden; aspect-ratio: 1; box-shadow: 0 4px 12px rgba(0,0,0,0.10); }
+.preview-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.preview-thumb .remove-img { position: absolute; top: 4px; right: 4px; width: 20px; height: 20px; background: rgba(0,0,0,0.55); color: white; border: none; border-radius: 50%; font-size: 11px; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0; margin: 0; transition: background 0.2s; }
+.preview-thumb .remove-img:hover { background: var(--error); }
+
+/* CONDITION GRID */
+.condition-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.condition-opt { border: 1.5px solid rgba(39,174,96,0.18); border-radius: 10px; padding: 12px 8px; text-align: center; cursor: pointer; transition: all 0.22s; background: var(--bg); }
+.condition-opt:hover { border-color: var(--green); background: var(--green-pale); }
+.condition-opt.selected { border-color: var(--green); background: var(--green-pale); box-shadow: 0 0 0 3px rgba(39,174,96,0.12); }
+.blue-form .condition-opt:hover { border-color: var(--blue); background: var(--blue-pale); }
+.blue-form .condition-opt.selected { border-color: var(--blue); background: var(--blue-pale); box-shadow: 0 0 0 3px rgba(41,128,185,0.12); }
+.cond-icon { margin-bottom: 5px; display: flex; justify-content: center; }
+.cond-icon svg { width: 22px; height: 22px; stroke: var(--green-dark); fill: none; }
+.blue-form .cond-icon svg { stroke: var(--blue-dark); }
+.cond-label { font-size: 12px; font-weight: 600; color: var(--text); }
+.cond-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+/* RENT PERIOD PILLS */
+.period-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.period-opt { border: 1.5px solid rgba(41,128,185,0.20); border-radius: 10px; padding: 10px 6px; text-align: center; cursor: pointer; transition: all 0.22s; background: var(--bg); }
+.period-opt:hover { border-color: var(--blue); background: var(--blue-pale); }
+.period-opt.selected { border-color: var(--blue); background: var(--blue-pale); box-shadow: 0 0 0 3px rgba(41,128,185,0.12); }
+.period-icon { font-size: 18px; margin-bottom: 4px; }
+.period-label { font-size: 12px; font-weight: 600; color: var(--text); }
+.period-sub { font-size: 10px; color: var(--muted); margin-top: 1px; }
+
+/* AVAILABILITY TOGGLE */
+.avail-grid { display: flex; gap: 8px; flex-wrap: wrap; }
+.avail-chip { border: 1.5px solid rgba(41,128,185,0.20); border-radius: 100px; padding: 7px 16px; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.22s; color: var(--muted); background: var(--bg); }
+.avail-chip:hover { border-color: var(--blue); color: var(--blue-dark); background: var(--blue-pale); }
+.avail-chip.selected { border-color: var(--blue); color: var(--blue-dark); background: var(--blue-pale); font-weight: 700; }
+
+/* NAV BUTTONS */
+.form-nav { display: flex; gap: 12px; margin-top: 28px; padding-top: 22px; border-top: 1px solid var(--green-mid); }
+.form-nav.blue-nav { border-top-color: var(--blue-mid); }
+.btn-back { padding: 12px 24px; border-radius: 10px; border: 1.5px solid rgba(39,174,96,0.22); background: transparent; color: var(--muted); font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.22s; width: auto; margin: 0; }
+.btn-back:hover { background: var(--bg); color: var(--text); }
+.btn-next { flex: 1; padding: 13px 24px; border-radius: 10px; border: none; background: linear-gradient(135deg, var(--green), var(--green-light)); color: white; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.22s; box-shadow: 0 4px 16px rgba(39,174,96,0.28); width: auto; margin: 0; }
+.btn-next:hover { background: linear-gradient(135deg, var(--green-dark), var(--green)); transform: translateY(-2px); box-shadow: 0 7px 22px rgba(39,174,96,0.36); }
+.btn-next.blue-btn { background: linear-gradient(135deg, var(--blue), var(--blue-light)); box-shadow: 0 4px 16px rgba(41,128,185,0.28); }
+.btn-next.blue-btn:hover { background: linear-gradient(135deg, var(--blue-dark), var(--blue)); box-shadow: 0 7px 22px rgba(41,128,185,0.36); }
+
+/* SIDEBAR */
+.sidebar { display: flex; flex-direction: column; gap: 20px; }
+.preview-card { background: white; border-radius: 20px; box-shadow: var(--card-shadow); border: 1px solid rgba(39,174,96,0.07); overflow: hidden; animation: fadeUp 0.7s 0.1s ease both; }
+.preview-card.blue-preview { border-color: rgba(41,128,185,0.10); box-shadow: 0 8px 32px rgba(41,128,185,0.10); }
+.preview-card-header { padding: 16px 20px; border-bottom: 1px solid var(--green-mid); display: flex; align-items: center; justify-content: space-between; }
+.preview-card.blue-preview .preview-card-header { border-bottom-color: var(--blue-mid); }
+.preview-card-header h4 { font-size: 14px; font-weight: 700; color: var(--text); }
+.live-badge { display: flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 600; color: var(--green-dark); background: var(--green-pale); padding: 3px 10px; border-radius: 100px; }
+.live-badge.blue-badge { color: var(--blue-dark); background: var(--blue-pale); }
+.live-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); animation: pulse 1.4s ease-in-out infinite; }
+.live-dot.blue-dot { background: var(--blue); }
+@keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(0.8); } }
+.preview-img-wrap { height: 180px; background: var(--green-pale); display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.preview-card.blue-preview .preview-img-wrap { background: var(--blue-pale); }
+.preview-img-wrap img { width: 100%; height: 100%; object-fit: cover; display: none; }
+.preview-placeholder { text-align: center; color: var(--muted); }
+.preview-placeholder .ph-icon { margin-bottom: 8px; display: flex; justify-content: center; }
+.preview-placeholder .ph-icon svg { width: 42px; height: 42px; stroke: var(--muted); opacity: 0.6; }
+.preview-info { padding: 16px 20px; }
+.preview-name { font-family: 'Playfair Display', serif; font-size: 17px; color: var(--text); margin-bottom: 4px; min-height: 24px; }
+.preview-name.empty { color: var(--muted); font-style: italic; font-size: 14px; font-family: 'DM Sans', sans-serif; }
+.preview-cat-row { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+.preview-cat { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--green); background: var(--green-pale); padding: 2px 8px; border-radius: 5px; }
+.preview-cat.blue-cat { color: var(--blue); background: var(--blue-pale); }
+.preview-cond { font-size: 11px; color: var(--muted); font-weight: 500; }
+.preview-price { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; color: var(--green-dark); margin-bottom: 6px; }
+.preview-price.blue-price { color: var(--blue-dark); }
+.preview-price.empty { color: var(--muted); font-size: 15px; font-family: 'DM Sans', sans-serif; font-style: italic; }
+.preview-period-badge { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 700; color: var(--blue-dark); background: var(--blue-pale); border: 1px solid var(--blue-mid); padding: 3px 10px; border-radius: 100px; margin-bottom: 10px; }
+.preview-desc { font-size: 13px; color: var(--muted); line-height: 1.6; min-height: 20px; font-style: italic; }
+.preview-btn-placeholder { display: flex; gap: 8px; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--green-mid); }
+.blue-preview .preview-btn-placeholder { border-top-color: var(--blue-mid); }
+.preview-btn { flex: 1; padding: 10px; border-radius: 8px; font-size: 13px; font-weight: 600; text-align: center; color: white; background: linear-gradient(135deg, var(--green), var(--green-light)); opacity: 0.6; cursor: default; border: none; width: auto; margin: 0; }
+.preview-btn.blue-pbtn { background: linear-gradient(135deg, var(--blue), var(--blue-light)); }
+
+/* TIPS */
+.tips-card { background: white; border-radius: 20px; box-shadow: var(--card-shadow); border: 1px solid rgba(39,174,96,0.07); padding: 22px; animation: fadeUp 0.7s 0.2s ease both; }
+.tips-card.blue-tips { border-color: rgba(41,128,185,0.10); }
+.tips-card h4 { font-size: 14px; font-weight: 700; margin-bottom: 14px; color: var(--text); display: flex; align-items: center; gap: 7px; }
+.tip { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 12px; }
+.tip:last-child { margin-bottom: 0; }
+.tip-icon { width: 28px; height: 28px; border-radius: 8px; background: var(--green-pale); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.tip-icon.blue-tip-icon { background: var(--blue-pale); }
+.tip-icon svg { width: 15px; height: 15px; stroke: var(--green-dark); fill: none; }
+.tip-icon.blue-tip-icon svg { stroke: var(--blue-dark); }
+.tip p { font-size: 13px; color: var(--muted); line-height: 1.5; }
+.tip p strong { color: var(--text); font-weight: 600; }
+
+/* SUCCESS */
+.success-screen { display: none; padding: 60px 28px; text-align: center; }
+.success-screen .success-icon { width: 72px; height: 72px; border-radius: 50%; background: linear-gradient(135deg, var(--green), var(--green-light)); display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; box-shadow: 0 10px 30px rgba(39,174,96,0.30); animation: popIn 0.5s cubic-bezier(.22,.68,0,1.5) both; }
+.success-screen .success-icon.blue-icon { background: linear-gradient(135deg, var(--blue), var(--blue-light)); box-shadow: 0 10px 30px rgba(41,128,185,0.30); }
+.success-screen .success-icon svg { width: 36px; height: 36px; stroke: white; stroke-width: 2.5; }
+@keyframes popIn { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.success-screen h3 { font-family: 'Playfair Display', serif; font-size: 22px; margin-bottom: 8px; }
+.success-screen p { font-size: 14px; color: var(--muted); margin-bottom: 24px; }
+.btn-success { display: inline-block; padding: 13px 32px; border-radius: 10px; background: linear-gradient(135deg, var(--green), var(--green-light)); color: white; font-weight: 700; font-size: 14px; cursor: pointer; border: none; box-shadow: 0 4px 16px rgba(39,174,96,0.28); transition: all 0.22s; margin: 6px; width: auto; }
+.btn-success:hover { transform: translateY(-2px); box-shadow: 0 7px 22px rgba(39,174,96,0.36); }
+.btn-success.blue-success { background: linear-gradient(135deg, var(--blue), var(--blue-light)); box-shadow: 0 4px 16px rgba(41,128,185,0.28); }
+.btn-view { display: inline-block; padding: 13px 32px; border-radius: 10px; background: white; color: var(--green-dark); font-weight: 700; font-size: 14px; cursor: pointer; border: 1.5px solid rgba(39,174,96,0.30); transition: all 0.22s; margin: 6px; width: auto; }
+.btn-view:hover { background: var(--green-pale); transform: translateY(-2px); }
+.btn-view.blue-view { color: var(--blue-dark); border-color: rgba(41,128,185,0.30); }
+.btn-view.blue-view:hover { background: var(--blue-pale); }
+
+/* MY LISTINGS PANEL */
+.my-listings-wrap { padding: 36px 60px 70px; }
+.listings-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+.listings-header h2 { font-family: 'Playfair Display', serif; font-size: 24px; color: var(--text); }
+.listings-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+
+/* MANAGE CARDS */
+.manage-card { background: white; border-radius: 18px; overflow: hidden; box-shadow: var(--card-shadow); border: 1px solid rgba(39,174,96,0.07); animation: fadeUp 0.4s ease both; transition: box-shadow 0.25s; }
+.manage-card:hover { box-shadow: 0 16px 40px rgba(39,174,96,0.14); }
+.manage-card.blue-manage { border-color: rgba(41,128,185,0.10); }
+.manage-card.blue-manage:hover { box-shadow: 0 16px 40px rgba(41,128,185,0.14); }
+.manage-card-img { position: relative; height: 160px; overflow: hidden; background: var(--green-pale); display: flex; align-items: center; justify-content: center; }
+.manage-card.blue-manage .manage-card-img { background: var(--blue-pale); }
+.manage-card-img img { width: 100%; height: 100%; object-fit: cover; }
+.manage-card-img .no-img { opacity: 0.3; }
+.manage-card-img .no-img svg { width: 44px; height: 44px; stroke: var(--green-dark); }
+.blue-manage .manage-card-img .no-img svg { stroke: var(--blue-dark); }
+.manage-card-type { position: absolute; top: 10px; left: 10px; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 100px; letter-spacing: 0.04em; }
+.type-sell { background: var(--green); color: white; }
+.type-rent { background: var(--blue); color: white; }
+.manage-card-body { padding: 16px; }
+.manage-card-body h4 { font-size: 15px; font-weight: 700; margin-bottom: 4px; color: var(--text); }
+.manage-card-meta { font-size: 12px; color: var(--muted); margin-bottom: 10px; display: flex; gap: 10px; flex-wrap: wrap; }
+.manage-card-price { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 700; color: var(--green-dark); margin-bottom: 6px; }
+.blue-manage .manage-card-price { color: var(--blue-dark); }
+.manage-card-period { font-size: 12px; color: var(--blue-dark); background: var(--blue-pale); border: 1px solid var(--blue-mid); display: inline-block; padding: 2px 10px; border-radius: 100px; font-weight: 600; margin-bottom: 10px; }
+.manage-card-date { font-size: 11px; color: var(--muted); margin-bottom: 14px; }
+.manage-card-actions { display: flex; gap: 8px; padding-top: 12px; border-top: 1px solid var(--green-mid); }
+.blue-manage .manage-card-actions { border-top-color: var(--blue-mid); }
+.btn-delete { flex: 1; padding: 9px 14px; border-radius: 9px; border: 1.5px solid rgba(231,76,60,0.25); background: #fdf0ef; color: var(--error); font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.22s; margin: 0; width: auto; }
+.btn-delete:hover { background: var(--error); color: white; border-color: var(--error); transform: translateY(-1px); }
+.btn-view-listing { flex: 1; padding: 9px 14px; border-radius: 9px; border: none; background: linear-gradient(135deg, var(--green), var(--green-light)); color: white; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.22s; margin: 0; width: auto; box-shadow: 0 3px 10px rgba(39,174,96,0.22); text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 5px; }
+.btn-view-listing:hover { transform: translateY(-1px); }
+.btn-view-listing.blue-view-btn { background: linear-gradient(135deg, var(--blue), var(--blue-light)); box-shadow: 0 3px 10px rgba(41,128,185,0.22); }
+
+/* EMPTY STATE */
+.listings-empty { text-align: center; padding: 70px 20px; color: var(--muted); }
+.listings-empty .e-icon { margin-bottom: 14px; display: flex; justify-content: center; }
+.listings-empty .e-icon svg { width: 54px; height: 54px; stroke: var(--muted); opacity: 0.45; }
+.listings-empty h3 { font-size: 18px; font-weight: 600; margin-bottom: 6px; color: var(--text); }
+.listings-empty p { font-size: 14px; margin-bottom: 20px; }
+.btn-start-listing { display: inline-block; padding: 12px 28px; background: linear-gradient(135deg, var(--green), var(--green-light)); color: white; border-radius: 10px; font-size: 14px; font-weight: 700; cursor: pointer; border: none; box-shadow: 0 4px 14px rgba(39,174,96,0.28); transition: all 0.22s; width: auto; margin: 4px; }
+.btn-start-listing:hover { transform: translateY(-2px); }
+.btn-start-listing.blue-start { background: linear-gradient(135deg, var(--blue), var(--blue-light)); box-shadow: 0 4px 14px rgba(41,128,185,0.28); }
+
+/* REVIEW BOX */
+.review-box { background: var(--green-pale); border: 1px solid var(--green-mid); border-radius: 14px; padding: 20px; margin-bottom: 24px; }
+.review-box.blue-review { background: var(--blue-pale); border-color: var(--blue-mid); }
+
+/* DEPOSIT BADGE */
+.deposit-note { background: #fffbeb; border: 1px solid #fde68a; border-radius: 10px; padding: 12px 16px; font-size: 13px; color: #92400e; margin-bottom: 16px; display: flex; align-items: flex-start; gap: 8px; }
+.deposit-note svg { width: 18px; height: 18px; stroke: #d97706; flex-shrink: 0; margin-top: 1px; }
+
+/* MODAL */
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.45); backdrop-filter: blur(4px); z-index: 500; display: none; align-items: center; justify-content: center; padding: 20px; }
+.modal-overlay.show { display: flex; animation: fadeIn 0.2s ease; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.modal { background: white; border-radius: 20px; padding: 32px; max-width: 380px; width: 100%; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.20); animation: popIn 0.3s cubic-bezier(.22,.68,0,1.2); }
+.modal-icon { margin-bottom: 12px; display: flex; justify-content: center; }
+.modal-icon svg { width: 44px; height: 44px; stroke: var(--error); fill: none; }
+.modal h3 { font-family: 'Playfair Display', serif; font-size: 20px; margin-bottom: 8px; }
+.modal p { font-size: 14px; color: var(--muted); margin-bottom: 24px; line-height: 1.6; }
+.modal-name { font-weight: 700; color: var(--text); }
+.modal-actions { display: flex; gap: 10px; }
+.modal-cancel { flex: 1; padding: 12px; border-radius: 10px; border: 1.5px solid rgba(39,174,96,0.22); background: transparent; color: var(--muted); font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.22s; margin: 0; width: auto; }
+.modal-cancel:hover { background: var(--bg); color: var(--text); }
+.modal-confirm-del { flex: 1; padding: 12px; border-radius: 10px; border: none; background: var(--error); color: white; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.22s; margin: 0; width: auto; box-shadow: 0 4px 14px rgba(231,76,60,0.28); }
+.modal-confirm-del:hover { background: #c0392b; transform: translateY(-1px); }
+
+/* TOAST */
+.toast { position: fixed; bottom: 30px; right: 30px; background: var(--text); color: white; padding: 14px 22px; border-radius: 12px; font-size: 14px; font-weight: 500; box-shadow: 0 10px 30px rgba(0,0,0,0.22); transform: translateY(80px); opacity: 0; transition: all 0.35s cubic-bezier(.22,.68,0,1.2); z-index: 999; display: flex; align-items: center; gap: 10px; }
+.toast.show { transform: translateY(0); opacity: 1; }
+.toast-icon { width: 24px; height: 24px; background: var(--green); border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.toast-icon svg { width: 13px; height: 13px; stroke: white; fill: none; }
+
+@media (max-width: 900px) {
+  .navbar { padding: 0 20px; }
+  .tab-bar { padding: 0 20px; }
+  .main-layout { grid-template-columns: 1fr; padding: 24px 20px 60px; }
+  .sidebar { order: -1; }
+  .field-row, .field-row-3 { grid-template-columns: 1fr; }
+  .my-listings-wrap { padding: 24px 20px 60px; }
+  .listings-header { flex-direction: column; align-items: flex-start; gap: 10px; }
+  .period-grid { grid-template-columns: repeat(2, 1fr); }
+  .nav-slider { display: none; }
+  .nav-links a { padding: 6px 11px; font-size: 13px; }
+}
+</style>
+</head>
+<body>
+<div class="scroll-progress" id="scrollProgress"></div>
+<!-- NAVBAR -->
+<nav class="navbar" id="navbar">
+  <div class="logo"><h2>ReuseMart</h2></div>
+  <div class="nav-links" id="navLinks">
+    <span class="nav-slider" id="navSlider"></span>
+    <a href="home.html"       class="nav-item" data-label="Home">Home</a>
+    <a href="materials.html"  class="nav-item" data-label="Buy">Buy</a>
+    <a href="rentitems.html"  class="nav-item" data-label="Rent">Rent</a>
+    <a href="listiteam.html"  class="nav-item active" data-label="List Items">List Items</a>
+    <a href="profile.html" class="nav-item cta">Profile</a>
+  </div>
+</nav>
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+  <div class="page-header-grid"></div>
+  <div class="page-header-inner">
+    <div class="page-tag">Sell &amp; Rent on ReuseMart</div>
+    <h1>List an Item</h1>
+    <p>Sell outright or rent out your items — reach thousands of buyers in your community.</p>
+  </div>
+</div>
+
+<!-- TAB BAR -->
+<div class="tab-bar">
+  <button class="tab-btn active" onclick="switchTab('list')">List New Item</button>
+  <button class="tab-btn" onclick="switchTab('manage')" id="manage-tab-btn">
+    My Listings <span class="tab-count" id="listing-count">0</span>
+  </button>
+  <button class="tab-btn rent-tab" onclick="switchTab('rent')" id="rent-tab-btn">
+    List for Rent <span class="tab-count blue" id="rent-count">0</span>
+  </button>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     TAB 1: LIST NEW ITEM (FOR SALE)
+═══════════════════════════════════════════ -->
+<div class="tab-panel active" id="tab-list">
+  <div class="main-layout">
+    <div class="form-card">
+      <div class="form-card-header">
+        <div class="form-card-header-icon">
+          <svg width="20" height="20" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        </div>
+        <div>
+          <h3>Item Details</h3>
+          <p>Fill in the details below to publish your listing</p>
+        </div>
+      </div>
+      <div class="form-body">
+        <div class="steps" id="sell-steps">
+          <div class="step active" id="step-ind-1"><div class="step-num">1</div><div class="step-label">Basic Info</div></div>
+          <div class="step-line" id="line-1"></div>
+          <div class="step" id="step-ind-2"><div class="step-num">2</div><div class="step-label">Photos</div></div>
+          <div class="step-line" id="line-2"></div>
+          <div class="step" id="step-ind-3"><div class="step-num">3</div><div class="step-label">Publish</div></div>
+        </div>
+
+        <!-- SECTION 1 -->
+        <div class="form-section active" id="section-1">
+          <div class="section-label">Basic Information</div>
+          <div class="field" id="f-name">
+            <label>Item Name <span>*</span></label>
+            <input type="text" id="item-name" placeholder="e.g. Cement Bags, Steel Rods..." oninput="updatePreview()">
+            <div class="field-error-msg">Please enter an item name.</div>
+          </div>
+          <div class="field-row">
+            <div class="field" id="f-category">
+              <label>Category <span>*</span></label>
+              <select id="item-category" onchange="updatePreview()">
+                <option value="">Select category</option>
+                <option>Materials</option><option>Tools</option><option>Electronics</option><option>Furniture</option><option>Other</option>
+              </select>
+              <div class="field-error-msg">Please select a category.</div>
+            </div>
+            <div class="field" id="f-price">
+              <label>Price (₹) <span>*</span></label>
+              <div class="price-input-wrap">
+                <span class="price-prefix">₹</span>
+                <input type="number" id="item-price" placeholder="0" min="0" oninput="updatePreview()">
+              </div>
+              <div class="field-error-msg">Please enter a valid price.</div>
+            </div>
+          </div>
+          <div class="field">
+            <label>Condition <span>*</span></label>
+            <div class="condition-grid">
+              <div class="condition-opt" onclick="selectCondition(this,'New')"><div class="cond-icon"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><div class="cond-label">New</div><div class="cond-sub">Unused</div></div>
+              <div class="condition-opt" onclick="selectCondition(this,'Like New')"><div class="cond-icon"><svg viewBox="0 0 24 24"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/></svg></div><div class="cond-label">Like New</div><div class="cond-sub">Barely used</div></div>
+              <div class="condition-opt" onclick="selectCondition(this,'Good')"><div class="cond-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg></div><div class="cond-label">Good</div><div class="cond-sub">Some wear</div></div>
+              <div class="condition-opt" onclick="selectCondition(this,'Fair')"><div class="cond-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="8" y1="15" x2="16" y2="15"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg></div><div class="cond-label">Fair</div><div class="cond-sub">Visible wear</div></div>
+              <div class="condition-opt" onclick="selectCondition(this,'For Parts')"><div class="cond-icon"><svg viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></div><div class="cond-label">For Parts</div><div class="cond-sub">Not working</div></div>
+              <div class="condition-opt" onclick="selectCondition(this,'Negotiable')"><div class="cond-icon"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div><div class="cond-label">Negotiable</div><div class="cond-sub">Open to offers</div></div>
+            </div>
+            <input type="hidden" id="item-condition">
+          </div>
+          <div class="field">
+            <label>Description</label>
+            <textarea id="item-desc" placeholder="Describe your item — condition, dimensions, usage history..." oninput="updatePreview()"></textarea>
+          </div>
+          <div class="field-row">
+            <div class="field"><label>Location <span>*</span></label><input type="text" id="item-location" placeholder="City, Area"></div>
+            <div class="field"><label>Quantity</label><input type="number" id="item-qty" placeholder="1" min="1" value="1"></div>
+          </div>
+          <div class="field"><label>Contact Number <span>*</span></label><input type="tel" id="item-phone" placeholder="+91 00000 00000"></div>
+          <div class="form-nav">
+            <button class="btn-next" onclick="goToStep(2)">Continue to Photos &rarr;</button>
+          </div>
+        </div>
+
+        <!-- SECTION 2 -->
+        <div class="form-section" id="section-2">
+          <div class="section-label">Item Photos</div>
+          <div class="field">
+            <label>Upload Photos</label>
+            <div class="upload-zone" id="upload-zone">
+              <input type="file" id="photo-input" accept="image/*" multiple onchange="handleImages(this)">
+              <div class="upload-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>
+              <div class="upload-title">Drop photos here or click to browse</div>
+              <div class="upload-sub">Supports JPG, PNG, WEBP &middot; Max 5 photos</div>
+            </div>
+            <div class="image-preview-grid" id="preview-grid"></div>
+          </div>
+          <div class="field">
+            <label>Or paste an image URL</label>
+            <input type="url" id="item-image-url" placeholder="https://..." oninput="updatePreviewImg()">
+          </div>
+          <div class="form-nav">
+            <button class="btn-back" onclick="goToStep(1)">&larr; Back</button>
+            <button class="btn-next" onclick="goToStep(3)">Review &amp; Publish &rarr;</button>
+          </div>
+        </div>
+
+        <!-- SECTION 3 -->
+        <div class="form-section" id="section-3">
+          <div class="section-label">Review &amp; Publish</div>
+          <div class="review-box" id="review-summary"></div>
+          <div class="field">
+            <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-weight:500;">
+              <input type="checkbox" id="agree-terms" style="width:16px;height:16px;accent-color:var(--green);margin:0;padding:0;border:none;">
+              I confirm this listing follows ReuseMart's community guidelines.
+            </label>
+          </div>
+          <div class="form-nav">
+            <button class="btn-back" onclick="goToStep(2)">&larr; Back</button>
+            <button class="btn-next" onclick="submitListing()">Publish Listing</button>
+          </div>
+        </div>
+
+        <!-- SUCCESS -->
+        <div class="success-screen" id="success-screen">
+          <div class="success-icon"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <h3>Listing Published!</h3>
+          <p>Your item is now live on ReuseMart and visible to buyers in your area.</p>
+          <button class="btn-success" onclick="resetForm()">List Another Item</button>
+          <button class="btn-view" onclick="switchTab('manage')">View My Listings</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SIDEBAR (sell) -->
+    <div class="sidebar">
+      <div class="preview-card">
+        <div class="preview-card-header">
+          <h4>Live Preview</h4>
+          <div class="live-badge"><div class="live-dot"></div> Live</div>
+        </div>
+        <div class="preview-img-wrap" id="prev-img-wrap">
+          <img id="prev-img" src="" alt="Preview">
+          <div class="preview-placeholder" id="prev-placeholder"><div class="ph-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div><p>Your photo appears here</p></div>
+        </div>
+        <div class="preview-info">
+          <div class="preview-name empty" id="prev-name">Item name will appear here</div>
+          <div class="preview-cat-row"><span class="preview-cat" id="prev-cat" style="display:none"></span><span class="preview-cond" id="prev-cond"></span></div>
+          <div class="preview-price empty" id="prev-price">Price not set</div>
+          <div class="preview-desc" id="prev-desc">Your description will appear here...</div>
+          <div class="preview-btn-placeholder"><div class="preview-btn">Add to Cart</div><div class="preview-btn blue">Buy Now</div></div>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     TAB 2: MY LISTINGS
+═══════════════════════════════════════════ -->
+<div class="tab-panel" id="tab-manage">
+  <div class="my-listings-wrap">
+    <div class="listings-header">
+      <h2>My Listings</h2>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <button class="btn-next" style="flex:none;padding:11px 22px;font-size:13px;" onclick="switchTab('list')">+ Add for Sale</button>
+        <button class="btn-next blue-btn" style="flex:none;padding:11px 22px;font-size:13px;" onclick="switchTab('rent')">+ Add for Rent</button>
+      </div>
+    </div>
+    <div id="listings-grid-container"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     TAB 3: LIST FOR RENT
+═══════════════════════════════════════════ -->
+<div class="tab-panel" id="tab-rent">
+  <div class="main-layout">
+    <div class="form-card blue-card">
+      <div class="form-card-header blue-header">
+        <div class="form-card-header-icon blue-icon">
+          <svg width="20" height="20" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><polyline points="23 20 23 14 17 14"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4-4.64 4.36A9 9 0 0 1 3.51 15"/></svg>
+        </div>
+        <div>
+          <h3>Rent Out Your Item</h3>
+          <p>Set your rental terms and let others borrow your item</p>
+        </div>
+      </div>
+      <div class="form-body blue-form">
+
+        <!-- STEPS -->
+        <div class="steps blue-steps" id="rent-step-bar">
+          <div class="step active" id="rs-1"><div class="step-num">1</div><div class="step-label">Item Info</div></div>
+          <div class="step-line" id="rl-1"></div>
+          <div class="step" id="rs-2"><div class="step-num">2</div><div class="step-label">Rental Terms</div></div>
+          <div class="step-line" id="rl-2"></div>
+          <div class="step" id="rs-3"><div class="step-num">3</div><div class="step-label">Photos</div></div>
+          <div class="step-line" id="rl-3"></div>
+          <div class="step" id="rs-4"><div class="step-num">4</div><div class="step-label">Publish</div></div>
+        </div>
+
+        <!-- RENT SECTION 1: Item Info -->
+        <div class="form-section active" id="rs-sec-1">
+          <div class="section-label blue-label">Item Information</div>
+          <div class="field" id="rf-name">
+            <label>Item Name <span>*</span></label>
+            <input type="text" id="r-name" placeholder="e.g. Power Drill, Ladder, Camera..." oninput="updateRentPreview()">
+            <div class="field-error-msg">Please enter an item name.</div>
+          </div>
+          <div class="field-row">
+            <div class="field" id="rf-cat">
+              <label>Category <span>*</span></label>
+              <select id="r-category" onchange="updateRentPreview()">
+                <option value="">Select category</option>
+                <option>Tools &amp; Equipment</option><option>Electronics</option><option>Furniture</option><option>Vehicles</option><option>Sports &amp; Outdoors</option><option>Photography</option><option>Construction</option><option>Other</option>
+              </select>
+              <div class="field-error-msg">Please select a category.</div>
+            </div>
+            <div class="field" id="rf-cond">
+              <label>Condition <span>*</span></label>
+              <select id="r-condition" onchange="updateRentPreview()">
+                <option value="">Select condition</option>
+                <option>New</option><option>Like New</option><option>Good</option><option>Fair</option>
+              </select>
+              <div class="field-error-msg">Please select condition.</div>
+            </div>
+          </div>
+          <div class="field">
+            <label>Description <span>*</span></label>
+            <textarea id="r-desc" placeholder="Describe the item — brand, model, dimensions, what it can be used for..." oninput="updateRentPreview()"></textarea>
+            <div class="field-hint">A good description builds trust with renters.</div>
+          </div>
+          <div class="field-row">
+            <div class="field"><label>Location <span>*</span></label><input type="text" id="r-location" placeholder="City, Area"></div>
+            <div class="field"><label>Quantity Available</label><input type="number" id="r-qty" placeholder="1" min="1" value="1"></div>
+          </div>
+          <div class="field"><label>Contact Number <span>*</span></label><input type="tel" id="r-phone" placeholder="+91 00000 00000"></div>
+          <div class="form-nav blue-nav">
+            <button class="btn-next blue-btn" onclick="goToRentStep(2)">Continue &rarr;</button>
+          </div>
+        </div>
+
+        <!-- RENT SECTION 2: Rental Terms -->
+        <div class="form-section" id="rs-sec-2">
+          <div class="section-label blue-label">Rental Pricing</div>
+
+          <div class="field">
+            <label>Rental Period <span>*</span></label>
+            <div class="period-grid" id="period-grid">
+              <div class="period-opt selected" onclick="selectPeriod(this,'per hour')"><div class="period-icon">⏱️</div><div class="period-label">Hourly</div><div class="period-sub">per hour</div></div>
+              <div class="period-opt" onclick="selectPeriod(this,'per day')"><div class="period-icon">📅</div><div class="period-label">Daily</div><div class="period-sub">per day</div></div>
+              <div class="period-opt" onclick="selectPeriod(this,'per week')"><div class="period-icon">🗓️</div><div class="period-label">Weekly</div><div class="period-sub">per week</div></div>
+              <div class="period-opt" onclick="selectPeriod(this,'per month')"><div class="period-icon">📆</div><div class="period-label">Monthly</div><div class="period-sub">per month</div></div>
+            </div>
+          </div>
+
+          <div class="field-row" id="rf-price-row">
+            <div class="field" id="rf-rprice">
+              <label>Rental Price (₹) <span>*</span></label>
+              <div class="price-input-wrap">
+                <span class="price-prefix">₹</span>
+                <input type="number" id="r-price" placeholder="0" min="0" oninput="updateRentPreview()">
+              </div>
+              <div class="field-error-msg">Please enter a valid rental price.</div>
+            </div>
+            <div class="field">
+              <label>Security Deposit (₹)</label>
+              <div class="price-input-wrap">
+                <span class="price-prefix">₹</span>
+                <input type="number" id="r-deposit" placeholder="0" min="0" oninput="updateRentPreview()">
+              </div>
+              <div class="field-hint">Refundable deposit for protection.</div>
+            </div>
+          </div>
+
+          <div class="deposit-note">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <span>Security deposit is collected from the renter and returned when the item is handed back in good condition.</span>
+          </div>
+
+          <div class="field">
+            <label>Minimum Rental Duration</label>
+            <div class="field-row">
+              <input type="number" id="r-min-dur" placeholder="1" min="1" value="1" style="border-radius:10px;border:1.5px solid rgba(41,128,185,0.18);padding:11px 14px;font-family:'DM Sans',sans-serif;font-size:14px;background:var(--bg);outline:none;">
+              <select id="r-min-unit" style="border-radius:10px;border:1.5px solid rgba(41,128,185,0.18);padding:11px 14px;font-family:'DM Sans',sans-serif;font-size:14px;background:var(--bg);outline:none;color:var(--text);">
+                <option>hour(s)</option><option selected>day(s)</option><option>week(s)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="field">
+            <label>Availability</label>
+            <div class="avail-grid" id="avail-grid">
+              <div class="avail-chip selected" onclick="toggleAvail(this)">Mon</div>
+              <div class="avail-chip selected" onclick="toggleAvail(this)">Tue</div>
+              <div class="avail-chip selected" onclick="toggleAvail(this)">Wed</div>
+              <div class="avail-chip selected" onclick="toggleAvail(this)">Thu</div>
+              <div class="avail-chip selected" onclick="toggleAvail(this)">Fri</div>
+              <div class="avail-chip" onclick="toggleAvail(this)">Sat</div>
+              <div class="avail-chip" onclick="toggleAvail(this)">Sun</div>
+            </div>
+            <div class="field-hint" style="margin-top:10px">Select the days your item is available to rent.</div>
+          </div>
+
+          <div class="field-row">
+            <div class="field">
+              <label>Available From</label>
+              <input type="date" id="r-from">
+            </div>
+            <div class="field">
+              <label>Available Until</label>
+              <input type="date" id="r-until">
+            </div>
+          </div>
+
+          <div class="form-nav blue-nav">
+            <button class="btn-back" onclick="goToRentStep(1)">&larr; Back</button>
+            <button class="btn-next blue-btn" onclick="goToRentStep(3)">Continue to Photos &rarr;</button>
+          </div>
+        </div>
+
+        <!-- RENT SECTION 3: Photos -->
+        <div class="form-section" id="rs-sec-3">
+          <div class="section-label blue-label">Item Photos</div>
+          <div class="field">
+            <label>Upload Photos</label>
+            <div class="upload-zone" id="r-upload-zone">
+              <input type="file" id="r-photo-input" accept="image/*" multiple onchange="handleRentImages(this)">
+              <div class="upload-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>
+              <div class="upload-title">Drop photos here or click to browse</div>
+              <div class="upload-sub">Clear photos build renter trust — max 5 images</div>
+            </div>
+            <div class="image-preview-grid" id="r-preview-grid"></div>
+          </div>
+          <div class="field">
+            <label>Or paste an image URL</label>
+            <input type="url" id="r-image-url" placeholder="https://..." oninput="updateRentPreviewImg()">
+          </div>
+          <div class="form-nav blue-nav">
+            <button class="btn-back" onclick="goToRentStep(2)">&larr; Back</button>
+            <button class="btn-next blue-btn" onclick="goToRentStep(4)">Review &amp; Publish &rarr;</button>
+          </div>
+        </div>
+
+        <!-- RENT SECTION 4: Review -->
+        <div class="form-section" id="rs-sec-4">
+          <div class="section-label blue-label">Review &amp; Publish</div>
+          <div class="review-box blue-review" id="r-review-summary"></div>
+          <div class="field">
+            <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-weight:500;">
+              <input type="checkbox" id="r-agree-terms" style="width:16px;height:16px;accent-color:var(--blue);margin:0;padding:0;border:none;">
+              I confirm this rental listing follows ReuseMart's community guidelines and I own or have rights to rent this item.
+            </label>
+          </div>
+          <div class="form-nav blue-nav">
+            <button class="btn-back" onclick="goToRentStep(3)">&larr; Back</button>
+            <button class="btn-next blue-btn" onclick="submitRentListing()">Publish Rental Listing</button>
+          </div>
+        </div>
+
+        <!-- RENT SUCCESS -->
+        <div class="success-screen" id="r-success-screen">
+          <div class="success-icon blue-icon"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <h3>Rental Listing Live!</h3>
+          <p>Your item is now available to rent on ReuseMart. Renters can find and book it right away.</p>
+          <button class="btn-success blue-success" onclick="resetRentForm()">List Another Rental</button>
+          <button class="btn-view blue-view" onclick="switchTab('manage')">View My Listings</button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- SIDEBAR (rent) -->
+    <div class="sidebar">
+      <div class="preview-card blue-preview">
+        <div class="preview-card-header">
+          <h4>Live Preview</h4>
+          <div class="live-badge blue-badge"><div class="live-dot blue-dot"></div> Rental</div>
+        </div>
+        <div class="preview-img-wrap" id="r-prev-img-wrap">
+          <img id="r-prev-img" src="" alt="Preview">
+          <div class="preview-placeholder" id="r-prev-placeholder"><div class="ph-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div><p>Your photo appears here</p></div>
+        </div>
+        <div class="preview-info">
+          <div class="preview-name empty" id="r-prev-name">Item name will appear here</div>
+          <div class="preview-cat-row">
+            <span class="preview-cat blue-cat" id="r-prev-cat" style="display:none"></span>
+            <span class="preview-cond" id="r-prev-cond"></span>
+          </div>
+          <div class="preview-price empty blue-price" id="r-prev-price">Price not set</div>
+          <div class="preview-period-badge" id="r-prev-period" style="display:none">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <span id="r-prev-period-text">per day</span>
+          </div>
+          <div class="preview-desc" id="r-prev-desc">Your description will appear here...</div>
+          <div class="preview-btn-placeholder">
+            <div class="preview-btn blue-pbtn">Book Now</div>
+            <div class="preview-btn" style="background:rgba(41,128,185,0.15);color:var(--blue-dark);">Enquire</div>
+          </div>
+        </div>
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+<!-- DELETE MODAL -->
+<div class="modal-overlay" id="delete-modal">
+  <div class="modal">
+    <div class="modal-icon"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></div>
+    <h3>Remove Listing?</h3>
+    <p>Are you sure you want to remove <span class="modal-name" id="modal-item-name"></span>? This cannot be undone.</p>
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="closeDeleteModal()">Cancel</button>
+      <button class="modal-confirm-del" onclick="confirmDelete()">Yes, Remove</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <div class="toast-icon"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+  <span id="toast-msg">Done!</span>
+</div>
+
+<script>
+/* ══════════════════════════════════════════
+   STATE
+══════════════════════════════════════════ */
+let currentStep   = 1;
+let selectedCondition = '';
+let firstImageBase64  = '';
+let deleteIndex   = -1;
+
+let rentStep      = 1;
+let rentPeriod    = 'per hour';
+let rentFirstImg  = '';
+
+/* ══════════════════════════════════════════
+   NAV SLIDER
+══════════════════════════════════════════ */
+(function () {
+  const nav    = document.getElementById('navLinks');
+  const slider = document.getElementById('navSlider');
+  const links  = Array.from(nav.querySelectorAll('a.nav-item'));
+  function moveTo(el) { const nr = nav.getBoundingClientRect(), er = el.getBoundingClientRect(); slider.style.left = (er.left - nr.left) + 'px'; slider.style.width = er.width + 'px'; slider.style.opacity = '1'; }
+  function reset() { const a = nav.querySelector('a.nav-item.active'); a ? moveTo(a) : (slider.style.opacity = '0'); }
+  links.forEach(l => { l.addEventListener('mouseenter', () => moveTo(l)); l.addEventListener('mouseleave', reset); });
+  requestAnimationFrame(() => requestAnimationFrame(reset));
+  window.addEventListener('resize', reset);
+})();
+
+/* ══════════════════════════════════════════
+   TABS
+══════════════════════════════════════════ */
+function switchTab(tab) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  const idx = { list: 0, manage: 1, rent: 2 }[tab];
+  document.querySelectorAll('.tab-btn')[idx].classList.add('active');
+  if (tab === 'manage') renderMyListings();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function updateListingCount() {
+  document.getElementById('listing-count').textContent = (JSON.parse(localStorage.getItem('listings')) || []).length;
+  document.getElementById('rent-count').textContent    = (JSON.parse(localStorage.getItem('rentListings')) || []).length;
+}
+
+/* ══════════════════════════════════════════
+   SELL FORM — STEPS
+══════════════════════════════════════════ */
+function goToStep(step) {
+  if (step > currentStep && !validateStep(currentStep)) return;
+  document.getElementById('section-' + currentStep).classList.remove('active');
+  document.getElementById('section-' + step).classList.add('active');
+  for (let i = 1; i <= 3; i++) {
+    const ind = document.getElementById('step-ind-' + i);
+    ind.classList.remove('active', 'done');
+    if (i < step) ind.classList.add('done');
+    else if (i === step) ind.classList.add('active');
+  }
+  for (let i = 1; i <= 2; i++) document.getElementById('line-' + i).classList.toggle('done', i < step);
+  if (step === 3) buildReview();
+  currentStep = step;
+  window.scrollTo({ top: 68, behavior: 'smooth' });
+}
+
+function validateStep(step) {
+  if (step === 1) {
+    const name = document.getElementById('item-name').value.trim();
+    const cat  = document.getElementById('item-category').value;
+    const price= document.getElementById('item-price').value;
+    setError('f-name', !name); setError('f-category', !cat); setError('f-price', !price || price < 0);
+    if (!name || !cat || !price || price < 0) return false;
+    if (!selectedCondition) { showToast('Please select the item condition.'); return false; }
+  }
+  return true;
+}
+
+function setError(id, has) { document.getElementById(id).classList.toggle('error', has); }
+
+function selectCondition(el, val) {
+  document.querySelectorAll('#section-1 .condition-opt').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected'); selectedCondition = val; updatePreview();
+}
+
+/* ══════════════════════════════════════════
+   SELL PREVIEW
+══════════════════════════════════════════ */
+function updatePreview() {
+  const name  = document.getElementById('item-name').value.trim();
+  const cat   = document.getElementById('item-category').value;
+  const price = document.getElementById('item-price').value;
+  const desc  = document.getElementById('item-desc').value.trim();
+  const pn = document.getElementById('prev-name'); pn.textContent = name || 'Item name will appear here'; pn.classList.toggle('empty', !name);
+  const pc = document.getElementById('prev-cat'); pc.textContent = cat; pc.style.display = cat ? 'inline-block' : 'none';
+  document.getElementById('prev-cond').textContent = selectedCondition || '';
+  const pp = document.getElementById('prev-price');
+  if (price) { pp.innerHTML = '<b>₹</b>' + parseInt(price).toLocaleString('en-IN'); pp.classList.remove('empty'); }
+  else { pp.textContent = 'Price not set'; pp.classList.add('empty'); }
+  document.getElementById('prev-desc').textContent = desc || 'Your description will appear here...';
+}
+
+function updatePreviewImg() {
+  const url = document.getElementById('item-image-url').value.trim();
+  if (url) { setPreviewImage(url); firstImageBase64 = url; }
+}
+
+function setPreviewImage(src) {
+  document.getElementById('prev-img').src = src;
+  document.getElementById('prev-img').style.display = 'block';
+  document.getElementById('prev-placeholder').style.display = 'none';
+}
+
+function handleImages(input) {
+  const files = Array.from(input.files).slice(0, 5);
+  const grid  = document.getElementById('preview-grid');
+  grid.innerHTML = ''; firstImageBase64 = '';
+  files.forEach((file, i) => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      if (i === 0) { firstImageBase64 = e.target.result; setPreviewImage(e.target.result); }
+      const thumb = document.createElement('div'); thumb.className = 'preview-thumb';
+      thumb.innerHTML = `<img src="${e.target.result}" alt="img"><button class="remove-img" onclick="removeThumb(this,'preview-grid','prev-img','prev-placeholder')">×</button>`;
+      grid.appendChild(thumb);
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function removeThumb(btn, gridId, imgId, phId) {
+  const grid = document.getElementById(gridId);
+  btn.parentElement.remove();
+  const first = grid.querySelector('.preview-thumb img');
+  if (first) { if (gridId === 'preview-grid') { firstImageBase64 = first.src; } else { rentFirstImg = first.src; } document.getElementById(imgId).src = first.src; document.getElementById(imgId).style.display = 'block'; document.getElementById(phId).style.display = 'none'; }
+  else { if (gridId === 'preview-grid') firstImageBase64 = ''; else rentFirstImg = ''; document.getElementById(imgId).style.display = 'none'; document.getElementById(phId).style.display = 'block'; }
+}
+
+const zone = document.getElementById('upload-zone');
+zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
+zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+zone.addEventListener('drop', e => { e.preventDefault(); zone.classList.remove('drag-over'); const inp = document.getElementById('photo-input'); inp.files = e.dataTransfer.files; handleImages(inp); });
+
+function buildReview() {
+  const name = document.getElementById('item-name').value.trim();
+  const cat  = document.getElementById('item-category').value;
+  const price= document.getElementById('item-price').value;
+  const loc  = document.getElementById('item-location').value.trim();
+  const qty  = document.getElementById('item-qty').value || 1;
+  document.getElementById('review-summary').innerHTML = `<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:13px;color:var(--text)"><div><strong>Item</strong><br>${name||'—'}</div><div><strong>Category</strong><br>${cat||'—'}</div><div><strong>Price</strong><br><b style="color:var(--green-dark)">₹${price?parseInt(price).toLocaleString('en-IN'):'—'}</b></div><div><strong>Condition</strong><br>${selectedCondition||'—'}</div><div><strong>Location</strong><br>${loc||'—'}</div><div><strong>Quantity</strong><br>${qty}</div></div>`;
+}
+
+function submitListing() {
+  if (!document.getElementById('agree-terms').checked) { showToast('Please agree to the community guidelines.'); return; }
+  const name  = document.getElementById('item-name').value.trim();
+  const price = document.getElementById('item-price').value;
+  const urlImg= document.getElementById('item-image-url').value.trim();
+  let listings = JSON.parse(localStorage.getItem('listings')) || [];
+  listings.push({ id: Date.now(), name, price: '₹' + price, category: document.getElementById('item-category').value, condition: selectedCondition, desc: document.getElementById('item-desc').value, location: document.getElementById('item-location').value, phone: document.getElementById('item-phone').value, qty: document.getElementById('item-qty').value || 1, image: firstImageBase64 || urlImg || '', type: 'sell', date: new Date().toLocaleString() });
+  localStorage.setItem('listings', JSON.stringify(listings));
+  updateListingCount();
+  document.getElementById('section-3').classList.remove('active');
+  document.getElementById('success-screen').style.display = 'block';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function resetForm() {
+  document.getElementById('success-screen').style.display = 'none';
+  document.getElementById('section-1').classList.add('active');
+  currentStep = 1; selectedCondition = ''; firstImageBase64 = '';
+  document.querySelectorAll('#section-1 .condition-opt').forEach(o => o.classList.remove('selected'));
+  document.querySelectorAll('#tab-list input[type=text],#tab-list input[type=number],#tab-list input[type=tel],#tab-list input[type=url],#tab-list textarea,#tab-list select').forEach(el => el.value = '');
+  document.getElementById('item-qty').value = 1;
+  document.getElementById('preview-grid').innerHTML = '';
+  document.getElementById('prev-img').style.display = 'none'; document.getElementById('prev-placeholder').style.display = 'block';
+  document.getElementById('agree-terms').checked = false;
+  updatePreview();
+  for (let i = 1; i <= 3; i++) { const ind = document.getElementById('step-ind-' + i); ind.classList.remove('active','done'); if (i===1) ind.classList.add('active'); }
+  document.getElementById('line-1').classList.remove('done'); document.getElementById('line-2').classList.remove('done');
+}
+
+/* ══════════════════════════════════════════
+   RENT FORM — STEPS
+══════════════════════════════════════════ */
+function goToRentStep(step) {
+  if (step > rentStep && !validateRentStep(rentStep)) return;
+  document.getElementById('rs-sec-' + rentStep).classList.remove('active');
+  document.getElementById('rs-sec-' + step).classList.add('active');
+  for (let i = 1; i <= 4; i++) {
+    const ind = document.getElementById('rs-' + i);
+    ind.classList.remove('active', 'done');
+    if (i < step) ind.classList.add('done');
+    else if (i === step) ind.classList.add('active');
+  }
+  for (let i = 1; i <= 3; i++) document.getElementById('rl-' + i).classList.toggle('done', i < step);
+  if (step === 4) buildRentReview();
+  rentStep = step;
+  window.scrollTo({ top: 68, behavior: 'smooth' });
+}
+
+function validateRentStep(step) {
+  if (step === 1) {
+    const name = document.getElementById('r-name').value.trim();
+    const cat  = document.getElementById('r-category').value;
+    const cond = document.getElementById('r-condition').value;
+    const desc = document.getElementById('r-desc').value.trim();
+    setError('rf-name', !name); setError('rf-cat', !cat); setError('rf-cond', !cond);
+    if (!name || !cat || !cond || !desc) { if (!desc) showToast('Please add a description.'); return false; }
+  }
+  if (step === 2) {
+    const price = document.getElementById('r-price').value;
+    setError('rf-rprice', !price || price < 0);
+    if (!price || price < 0) return false;
+  }
+  return true;
+}
+
+function selectPeriod(el, val) {
+  document.querySelectorAll('#period-grid .period-opt').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected'); rentPeriod = val; updateRentPreview();
+}
+
+function toggleAvail(el) { el.classList.toggle('selected'); }
+
+/* ══════════════════════════════════════════
+   RENT PREVIEW
+══════════════════════════════════════════ */
+function updateRentPreview() {
+  const name  = document.getElementById('r-name').value.trim();
+  const cat   = document.getElementById('r-category').value;
+  const cond  = document.getElementById('r-condition').value;
+  const price = document.getElementById('r-price').value;
+  const desc  = document.getElementById('r-desc').value.trim();
+
+  const rn = document.getElementById('r-prev-name'); rn.textContent = name || 'Item name will appear here'; rn.classList.toggle('empty', !name);
+  const rc = document.getElementById('r-prev-cat'); rc.textContent = cat; rc.style.display = cat ? 'inline-block' : 'none';
+  document.getElementById('r-prev-cond').textContent = cond || '';
+  const rp = document.getElementById('r-prev-price');
+  if (price) { rp.innerHTML = '<b>₹</b>' + parseInt(price).toLocaleString('en-IN'); rp.classList.remove('empty'); }
+  else { rp.textContent = 'Price not set'; rp.classList.add('empty'); }
+  const periodBadge = document.getElementById('r-prev-period');
+  periodBadge.style.display = 'inline-flex';
+  document.getElementById('r-prev-period-text').textContent = rentPeriod;
+  document.getElementById('r-prev-desc').textContent = desc || 'Your description will appear here...';
+}
+
+function updateRentPreviewImg() {
+  const url = document.getElementById('r-image-url').value.trim();
+  if (url) { setRentPreviewImage(url); rentFirstImg = url; }
+}
+
+function setRentPreviewImage(src) {
+  document.getElementById('r-prev-img').src = src;
+  document.getElementById('r-prev-img').style.display = 'block';
+  document.getElementById('r-prev-placeholder').style.display = 'none';
+}
+
+function handleRentImages(input) {
+  const files = Array.from(input.files).slice(0, 5);
+  const grid  = document.getElementById('r-preview-grid');
+  grid.innerHTML = ''; rentFirstImg = '';
+  files.forEach((file, i) => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      if (i === 0) { rentFirstImg = e.target.result; setRentPreviewImage(e.target.result); }
+      const thumb = document.createElement('div'); thumb.className = 'preview-thumb';
+      thumb.innerHTML = `<img src="${e.target.result}" alt="img"><button class="remove-img" onclick="removeThumb(this,'r-preview-grid','r-prev-img','r-prev-placeholder')">×</button>`;
+      grid.appendChild(thumb);
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+const rzone = document.getElementById('r-upload-zone');
+rzone.addEventListener('dragover', e => { e.preventDefault(); rzone.classList.add('drag-over'); });
+rzone.addEventListener('dragleave', () => rzone.classList.remove('drag-over'));
+rzone.addEventListener('drop', e => { e.preventDefault(); rzone.classList.remove('drag-over'); const inp = document.getElementById('r-photo-input'); inp.files = e.dataTransfer.files; handleRentImages(inp); });
+
+function buildRentReview() {
+  const name  = document.getElementById('r-name').value.trim();
+  const cat   = document.getElementById('r-category').value;
+  const price = document.getElementById('r-price').value;
+  const dep   = document.getElementById('r-deposit').value;
+  const loc   = document.getElementById('r-location').value.trim();
+  const minDur= document.getElementById('r-min-dur').value;
+  const minUnit = document.getElementById('r-min-unit').value;
+  const avail = Array.from(document.querySelectorAll('#avail-grid .avail-chip.selected')).map(c => c.textContent).join(', ') || 'Not specified';
+  document.getElementById('r-review-summary').innerHTML = `<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:13px;color:var(--text)"><div><strong>Item</strong><br>${name||'—'}</div><div><strong>Category</strong><br>${cat||'—'}</div><div><strong>Rental Price</strong><br><b style="color:var(--blue-dark)">₹${price?parseInt(price).toLocaleString('en-IN'):'—'}</b> ${rentPeriod}</div><div><strong>Deposit</strong><br>${dep?'₹'+parseInt(dep).toLocaleString('en-IN'):'None'}</div><div><strong>Location</strong><br>${loc||'—'}</div><div><strong>Min. Duration</strong><br>${minDur} ${minUnit}</div><div style="grid-column:1/-1"><strong>Available Days</strong><br>${avail}</div></div>`;
+}
+
+function submitRentListing() {
+  if (!document.getElementById('r-agree-terms').checked) { showToast('Please agree to the community guidelines.'); return; }
+  const name  = document.getElementById('r-name').value.trim();
+  const price = document.getElementById('r-price').value;
+  const dep   = document.getElementById('r-deposit').value;
+  const urlImg= document.getElementById('r-image-url').value.trim();
+  const avail = Array.from(document.querySelectorAll('#avail-grid .avail-chip.selected')).map(c => c.textContent);
+  let rentListings = JSON.parse(localStorage.getItem('rentListings')) || [];
+  rentListings.push({
+    id: Date.now(), name, price: '₹' + price, period: rentPeriod,
+    deposit: dep ? '₹' + dep : null,
+    category: document.getElementById('r-category').value,
+    condition: document.getElementById('r-condition').value,
+    desc: document.getElementById('r-desc').value,
+    location: document.getElementById('r-location').value,
+    phone: document.getElementById('r-phone').value,
+    qty: document.getElementById('r-qty').value || 1,
+    minDuration: document.getElementById('r-min-dur').value + ' ' + document.getElementById('r-min-unit').value,
+    availDays: avail,
+    availFrom: document.getElementById('r-from').value,
+    availUntil: document.getElementById('r-until').value,
+    image: rentFirstImg || urlImg || '',
+    type: 'rent', date: new Date().toLocaleString()
+  });
+  localStorage.setItem('rentListings', JSON.stringify(rentListings));
+  updateListingCount();
+  document.getElementById('rs-sec-4').classList.remove('active');
+  document.getElementById('r-success-screen').style.display = 'block';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function resetRentForm() {
+  document.getElementById('r-success-screen').style.display = 'none';
+  document.getElementById('rs-sec-1').classList.add('active');
+  rentStep = 1; rentFirstImg = '';
+  document.querySelectorAll('#tab-rent input[type=text],#tab-rent input[type=number],#tab-rent input[type=tel],#tab-rent input[type=url],#tab-rent input[type=date],#tab-rent textarea').forEach(el => el.value = '');
+  document.querySelectorAll('#tab-rent select').forEach(el => el.value = '');
+  document.getElementById('r-qty').value = 1; document.getElementById('r-min-dur').value = 1;
+  document.getElementById('r-preview-grid').innerHTML = '';
+  document.getElementById('r-prev-img').style.display = 'none'; document.getElementById('r-prev-placeholder').style.display = 'block';
+  document.getElementById('r-agree-terms').checked = false;
+  document.querySelectorAll('#period-grid .period-opt').forEach((o,i) => { o.classList.remove('selected'); if(i===0) o.classList.add('selected'); }); rentPeriod = 'per hour';
+  document.querySelectorAll('#avail-grid .avail-chip').forEach((c,i) => { c.classList.remove('selected'); if(i<5) c.classList.add('selected'); });
+  updateRentPreview();
+  for (let i = 1; i <= 4; i++) { const ind = document.getElementById('rs-' + i); ind.classList.remove('active','done'); if(i===1) ind.classList.add('active'); }
+  for (let i = 1; i <= 3; i++) document.getElementById('rl-' + i).classList.remove('done');
+}
+
+/* ══════════════════════════════════════════
+   MY LISTINGS
+══════════════════════════════════════════ */
+function renderMyListings() {
+  const sellItems = JSON.parse(localStorage.getItem('listings'))     || [];
+  const rentItems = JSON.parse(localStorage.getItem('rentListings')) || [];
+  const all = [...sellItems.map(i => ({...i,_src:'listings'})), ...rentItems.map(i => ({...i,_src:'rentListings'}))];
+  all.sort((a, b) => b.id - a.id);
+
+  const container = document.getElementById('listings-grid-container');
+  if (all.length === 0) {
+    container.innerHTML = `<div class="listings-empty"><div class="e-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><path d="M20 7H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/><path d="M16 3H8L6 7h12l-2-4z"/></svg></div><h3>No listings yet</h3><p>Start selling or renting out your items today!</p><button class="btn-start-listing" onclick="switchTab('list')">+ Add for Sale</button><button class="btn-start-listing blue-start" onclick="switchTab('rent')">+ Add for Rent</button></div>`;
+    return;
+  }
+  container.innerHTML = `<div class="listings-grid">${all.map((item, i) => {
+    const isRent = item.type === 'rent';
+    return `<div class="manage-card ${isRent ? 'blue-manage' : ''}" style="animation-delay:${i*0.07}s" data-src="${item._src}" data-id="${item.id}">
+      <div class="manage-card-img">
+        ${item.image ? `<img src="${item.image}" alt="${item.name}" onerror="this.style.display='none'">` : `<div class="no-img"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>`}
+        <span class="manage-card-type type-${item.type||'sell'}">${isRent ? 'Rent' : 'Sell'}</span>
+      </div>
+      <div class="manage-card-body">
+        <h4>${item.name}</h4>
+        <div class="manage-card-meta"><span>${item.category||'—'}</span>${item.condition?`<span>${item.condition}</span>`:''}</div>
+        <div class="manage-card-price"><b>₹</b>${parseInt((item.price||'0').replace('₹','')).toLocaleString('en-IN')}${isRent?` <span style="font-size:13px;font-weight:500;color:var(--muted);font-family:'DM Sans',sans-serif">${item.period||''}</span>`:''}</div>
+        ${isRent && item.deposit ? `<div style="font-size:12px;color:var(--muted);margin-bottom:6px">Deposit: ${item.deposit}</div>` : ''}
+        ${isRent && item.availDays && item.availDays.length ? `<div style="font-size:11px;color:var(--blue-dark);background:var(--blue-pale);display:inline-block;padding:2px 10px;border-radius:100px;margin-bottom:10px;font-weight:600;border:1px solid var(--blue-mid)">${item.availDays.join(' · ')}</div>` : ''}
+        <div class="manage-card-date">Listed on ${item.date||'—'}</div>
+        <div class="manage-card-actions">
+          <button class="btn-view-listing ${isRent?'blue-view-btn':''}" onclick="navigateTo('${isRent?'rentitems':'materials'}.html')">View in Shop</button>
+          <button class="btn-delete" onclick="openDeleteModal('${item._src}','${item.id}','${item.name.replace(/'/g,"\\'")}')">Remove</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('')}</div>`;
+}
+
+/* ══════════════════════════════════════════
+   DELETE
+══════════════════════════════════════════ */
+let deleteSource = '';
+let deleteId = null;
+
+function openDeleteModal(src, id, name) {
+  deleteSource = src; deleteId = parseInt(id);
+  document.getElementById('modal-item-name').textContent = '"' + name + '"';
+  document.getElementById('delete-modal').classList.add('show');
+}
+function closeDeleteModal() { document.getElementById('delete-modal').classList.remove('show'); deleteSource = ''; deleteId = null; }
+function confirmDelete() {
+  if (!deleteSource || !deleteId) return;
+  let items = JSON.parse(localStorage.getItem(deleteSource)) || [];
+  const idx = items.findIndex(i => i.id === deleteId);
+  const name = items[idx]?.name || 'Item';
+  if (idx > -1) items.splice(idx, 1);
+  localStorage.setItem(deleteSource, JSON.stringify(items));
+  closeDeleteModal(); updateListingCount(); renderMyListings();
+  showToast('"' + name + '" removed.');
+}
+document.getElementById('delete-modal').addEventListener('click', function(e) { if (e.target === this) closeDeleteModal(); });
+
+/* ══════════════════════════════════════════
+   TOAST
+══════════════════════════════════════════ */
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  document.getElementById('toast-msg').textContent = msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 3000);
+}
+
+/* INIT */
+updateListingCount();
+</script>
+<script>const progressBar = document.getElementById('scrollProgress');
+
+window.addEventListener('scroll', () => {
+  const scrollY = window.scrollY;
+  const docH    = document.documentElement.scrollHeight - window.innerHeight;
+  const pct     = docH > 0 ? (scrollY / docH) * 100 : 0;
+  progressBar.style.width = pct.toFixed(1) + '%';
+}, { passive: true });</script>
+<script src="transition.js"></script>
+</body>
+</html>

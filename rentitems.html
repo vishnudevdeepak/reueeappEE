@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rent Items - ReuseMart</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"><link rel="stylesheet" href="transition.css">
+<style>
+  .scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  width: 0%;
+  background: linear-gradient(90deg, #27ae60, #2ecc71);
+  z-index: 9999;
+  transition: width 0.05s linear;
+  box-shadow: 0 0 8px rgba(39, 174, 96, 0.6);
+}
+:root {
+  --green:        #27ae60;
+  --green-light:  #2ecc71;
+  --green-dark:   #1e8449;
+  --green-pale:   #eafaf1;
+  --green-mid:    #d5f5e3;
+  --green-glow:   rgba(39,174,96,0.15);
+  --bg:           #f4f8f6;
+  --text:         #1a2e22;
+  --muted:        #6b8f78;
+  --border:       #e0f0e6;
+  --white:        #ffffff;
+  --card-shadow:  0 4px 24px rgba(39,174,96,0.08);
+  --card-hover:   0 22px 52px rgba(39,174,96,0.18);
+}
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  background: linear-gradient(135deg, #d4f5e9, #f4f8f6);
+  font-family: 'DM Sans', sans-serif;
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── NAVBAR ── */
+.navbar {
+  background: rgba(255,255,255,0.25);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  padding: 0 60px;
+  height: 68px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  border-bottom: 1px solid rgba(255,255,255,0.30);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.05);
+}
+
+.logo h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px;
+  color: var(--green-dark);
+  letter-spacing: -0.5px;
+}
+
+.nav-links {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transform: translateX(120px);
+  opacity: 0;
+  animation: slideInRight 0.8s cubic-bezier(0.22,1,0.36,1) forwards;
+}
+.nav-slider {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  height: 38px;
+  width: 0;
+  transform: translateY(-50%);
+  background: rgba(39,174,96,0.14);
+  border-radius: 999px;
+  border: 1px solid rgba(39,174,96,0.22);
+  transition: left 0.28s cubic-bezier(.22,.68,0,1.2), width 0.28s cubic-bezier(.22,.68,0,1.2);
+  pointer-events: none;
+  z-index: 0;
+}
+@keyframes slideInRight { to { transform: translateX(0); opacity: 1; } }
+
+.nav-item {
+  position: relative;
+  z-index: 1;
+  text-decoration: none;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 500;
+  padding: 7px 16px;
+  border-radius: 10px;
+  transition: color 0.22s;
+}
+.nav-item:hover { color: var(--green-dark); }
+.nav-item.active { color: var(--green-dark); font-weight: 600; }
+.nav-item.cta { margin-left: 6px; }
+
+/* ── PAGE HEADER ── */
+.page-header {
+  background: linear-gradient(135deg, #0d3320 0%, #1e6b3c 55%, #27ae60 100%);
+  padding: 52px 60px 44px;
+  position: relative;
+  overflow: hidden;
+}
+.page-header-grid {
+  position: absolute; inset: 0;
+  background-image: linear-gradient(rgba(46,204,113,0.06) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(46,204,113,0.06) 1px, transparent 1px);
+  background-size: 50px 50px; pointer-events: none;
+}
+.page-header::before,
+.page-header::after { content: ""; position: absolute; border-radius: 50%; opacity: 0.10; background: white; pointer-events: none; }
+.page-header::before { width: 360px; height: 360px; top: -120px; left: -80px; }
+.page-header::after  { width: 280px; height: 280px; bottom: -100px; right: -60px; }
+
+.page-header-inner { position: relative; max-width: 560px; animation: fadeUp 0.7s cubic-bezier(.22,.68,0,1.2) both; }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(22px); } to { opacity: 1; transform: translateY(0); } }
+
+.page-tag {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.20);
+  padding: 5px 14px; border-radius: 100px; font-size: 12px;
+  color: rgba(255,255,255,0.85); font-weight: 500; letter-spacing: 0.05em; margin-bottom: 14px;
+}
+.page-tag svg { width: 13px; height: 13px; stroke: rgba(255,255,255,0.85); fill: none; stroke-width: 2; }
+.page-header h1 { font-family: 'Playfair Display', serif; font-size: clamp(28px,4vw,40px); color: white; letter-spacing: -0.5px; margin-bottom: 8px; }
+.page-header p { color: rgba(255,255,255,0.65); font-size: 15px; font-weight: 300; }
+
+/* ── FILTERS BAR ── */
+.filters-bar {
+  background: var(--white);
+  border-bottom: 1px solid var(--border);
+  box-shadow: 0 2px 12px rgba(39,174,96,0.05);
+  padding: 16px 60px;
+  display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+  position: sticky; top: 68px; z-index: 150;
+}
+.search-wrap { position: relative; flex: 1; max-width: 320px; }
+.search-wrap .search-icon {
+  position: absolute; left: 13px; top: 50%; transform: translateY(-50%);
+  pointer-events: none; width: 15px; height: 15px;
+  stroke: var(--muted); fill: none; stroke-width: 2;
+}
+.search-wrap input {
+  width: 100%; padding: 11px 14px 11px 38px; border-radius: 10px;
+  border: 1.5px solid var(--border); background: var(--bg);
+  font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--text);
+  outline: none; transition: border 0.2s, box-shadow 0.2s, background 0.2s;
+}
+.search-wrap input:focus { border-color: var(--green); box-shadow: 0 0 0 3px var(--green-glow); background: white; }
+.search-wrap input::placeholder { color: #aab8b0; font-weight: 300; }
+
+.filter-select {
+  padding: 11px 36px 11px 14px; border-radius: 10px;
+  border: 1.5px solid var(--border); background: var(--bg);
+  font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--text);
+  outline: none; appearance: none; cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%236b8f78' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 12px center;
+  transition: border 0.2s, box-shadow 0.2s;
+}
+.filter-select:focus { border-color: var(--green); box-shadow: 0 0 0 3px var(--green-glow); }
+.results-count { margin-left: auto; font-size: 13px; color: var(--muted); font-weight: 500; }
+
+/* ── GRID ── */
+.grid-wrap { max-width: 1200px; margin: 0 auto; padding: 36px 60px 70px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 22px; }
+
+/* ── CARD — Floating Drop-In base state ── */
+.card {
+  background: var(--white);
+  border-radius: 18px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  box-shadow: var(--card-shadow);
+  display: flex;
+  flex-direction: column;
+
+  /* start: floating above, blurred, slightly tilted */
+  opacity: 0;
+  transform: perspective(1000px) translateY(-70px) translateZ(90px) rotateX(-20deg) scale(0.90);
+  filter: blur(5px);
+
+  transition:
+    opacity   0.75s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.75s cubic-bezier(0.22, 1, 0.36, 1),
+    filter    0.55s ease,
+    box-shadow  0.30s ease,
+    border-color 0.28s ease;
+}
+
+/* triggered by IntersectionObserver */
+.card.drop-in {
+  animation: softLanding 0.75s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes softLanding {
+  0%   { opacity: 0; transform: perspective(1000px) translateY(-70px) translateZ(90px) rotateX(-20deg) scale(0.90); filter: blur(5px); }
+  55%  { opacity: 1; transform: perspective(1000px) translateY(7px)   translateZ(-8px)  rotateX(2.5deg) scale(1.015); filter: blur(0); }
+  75%  { transform: perspective(1000px) translateY(-3px) translateZ(3px) rotateX(-1deg) scale(0.997); }
+  100% { opacity: 1; transform: perspective(1000px) translateY(0) translateZ(0) rotateX(0deg) scale(1); filter: blur(0); }
+}
+
+.card.drop-in:hover {
+  transform: translateY(-7px) scale(1.02) !important;
+  box-shadow: var(--card-hover);
+  border-color: #a8dfc0;
+}
+
+.card-img-wrap { position: relative; overflow: hidden; height: 175px; }
+.card-img-wrap img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.38s; display: block; }
+.card.drop-in:hover .card-img-wrap img { transform: scale(1.07); }
+
+.card-tag {
+  position: absolute; top: 12px; left: 12px;
+  background: rgba(255,255,255,0.92); backdrop-filter: blur(6px);
+  border: 1px solid rgba(39,174,96,0.2); border-radius: 100px;
+  padding: 3px 10px; font-size: 11px; font-weight: 600; color: var(--green-dark); text-transform: capitalize;
+}
+.card-new-badge {
+  position: absolute; top: 12px; right: 12px;
+  background: linear-gradient(135deg, var(--green), var(--green-light));
+  color: white; border-radius: 100px; padding: 3px 10px;
+  font-size: 10px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;
+  box-shadow: 0 2px 8px rgba(39,174,96,0.40);
+}
+
+.card-body { padding: 16px; display: flex; flex-direction: column; flex: 1; }
+.card-body h4 { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+
+.price-row { display: flex; align-items: baseline; gap: 4px; margin-bottom: 14px; }
+.price { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; color: var(--green-dark); }
+.price-unit { font-size: 12px; color: var(--muted); font-weight: 500; }
+
+.btn-rent {
+  margin-top: auto; width: 100%; padding: 11px 14px; border: none; border-radius: 10px;
+  cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 700;
+  background: linear-gradient(135deg, var(--green), var(--green-light));
+  color: white; box-shadow: 0 3px 10px rgba(39,174,96,0.28); transition: all 0.22s;
+  display: flex; align-items: center; justify-content: center; gap: 7px;
+}
+.btn-rent:hover { box-shadow: 0 6px 20px rgba(39,174,96,0.42); transform: translateY(-1px); background: linear-gradient(135deg, var(--green-dark), var(--green)); }
+.btn-rent svg { flex-shrink: 0; stroke: white; fill: none; stroke-width: 2.5; }
+
+/* ── EMPTY ── */
+.empty { grid-column: 1/-1; text-align: center; padding: 70px 20px; color: var(--muted); }
+.empty-icon { display: flex; justify-content: center; margin-bottom: 16px; }
+.empty-icon svg { width: 52px; height: 52px; stroke: var(--muted); opacity: 0.4; fill: none; stroke-width: 1.5; }
+.empty h3 { font-size: 18px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+.empty p { font-size: 14px; }
+
+/* ── RENT MODAL ── */
+#rentModal {
+  display: none; position: fixed; inset: 0;
+  background: rgba(13,26,18,0.55); backdrop-filter: blur(5px);
+  justify-content: center; align-items: center; z-index: 500; padding: 20px;
+}
+.modal-box {
+  background: var(--white); border-radius: 22px; width: 100%; max-width: 400px;
+  overflow: hidden; box-shadow: 0 32px 80px rgba(0,0,0,0.22);
+  animation: popIn 0.3s cubic-bezier(.22,.68,0,1.2);
+}
+@keyframes popIn { from { transform: scale(0.88); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+.modal-header { background: linear-gradient(135deg, #0d3320, var(--green)); padding: 24px 26px 20px; color: white; position: relative; }
+.modal-header h3 { font-family: 'Playfair Display', serif; font-size: 19px; font-weight: 600; margin-bottom: 4px; }
+.modal-header p { font-size: 13px; opacity: 0.75; }
+.modal-close {
+  position: absolute; top: 16px; right: 18px;
+  background: rgba(255,255,255,0.15); border: none; width: 30px; height: 30px;
+  border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: background 0.2s; padding: 0; margin: 0;
+}
+.modal-close svg { width: 14px; height: 14px; stroke: white; fill: none; stroke-width: 2.5; }
+.modal-close:hover { background: rgba(255,255,255,0.28); }
+
+.modal-body { padding: 26px; }
+.input-label { font-size: 11px; font-weight: 700; letter-spacing: 0.10em; text-transform: uppercase; color: var(--green); margin-bottom: 8px; display: block; }
+.modal-body input[type="number"] {
+  width: 100%; padding: 12px 14px; border-radius: 10px; border: 1.5px solid var(--border);
+  font-family: 'DM Sans', sans-serif; font-size: 15px; color: var(--text);
+  outline: none; background: var(--bg); transition: border 0.2s, box-shadow 0.2s, background 0.2s; margin-bottom: 18px;
+}
+.modal-body input[type="number"]:focus { border-color: var(--green); box-shadow: 0 0 0 3px var(--green-glow); background: white; }
+
+.total-preview {
+  background: var(--green-pale); border: 1.5px solid var(--green-mid); border-left: 4px solid var(--green);
+  border-radius: 12px; padding: 14px 18px; display: flex; justify-content: space-between;
+  align-items: center; margin-bottom: 20px;
+}
+.total-label { font-size: 13px; color: var(--green-dark); font-weight: 500; }
+.total-amount { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; color: var(--green-dark); }
+
+.modal-actions { display: flex; gap: 10px; }
+.btn-confirm {
+  flex: 1; padding: 12px; border: none; border-radius: 10px; cursor: pointer;
+  font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 700;
+  background: linear-gradient(135deg, var(--green), var(--green-light));
+  color: white; box-shadow: 0 3px 12px rgba(39,174,96,0.32); transition: all 0.22s; margin: 0;
+}
+.btn-confirm:hover { background: linear-gradient(135deg, var(--green-dark), var(--green)); box-shadow: 0 6px 20px rgba(39,174,96,0.45); transform: translateY(-1px); }
+.btn-cancel-modal {
+  padding: 12px 18px; border: 1.5px solid var(--border); border-radius: 10px; cursor: pointer;
+  font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500;
+  background: var(--white); color: var(--muted); transition: all 0.22s; margin: 0;
+}
+.btn-cancel-modal:hover { background: var(--bg); color: var(--text); }
+
+/* ── TOAST ── */
+.toast {
+  position: fixed; bottom: 30px; right: 30px;
+  background: var(--text); color: white; padding: 14px 22px; border-radius: 12px;
+  font-size: 14px; font-weight: 500; box-shadow: 0 10px 30px rgba(0,0,0,0.22);
+  display: flex; align-items: center; gap: 10px;
+  transform: translateY(80px); opacity: 0;
+  transition: all 0.35s cubic-bezier(.22,.68,0,1.2); z-index: 999; pointer-events: none;
+}
+.toast.show { transform: translateY(0); opacity: 1; pointer-events: auto; }
+.toast-icon { width: 24px; height: 24px; background: var(--green); border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.toast-icon svg { width: 13px; height: 13px; stroke: white; fill: none; stroke-width: 2.5; }
+
+@media (max-width: 900px) {
+  .navbar { padding: 0 20px; }
+  .filters-bar { padding: 14px 20px; }
+  .grid-wrap { padding: 24px 20px 60px; }
+  .page-header { padding: 40px 20px 36px; }
+}
+</style>
+</head>
+<body>
+<div class="scroll-progress" id="scrollProgress"></div>
+<!-- NAVBAR -->
+<nav class="navbar">
+  <div class="logo"><h2>ReuseMart</h2></div>
+  <div class="nav-links" id="navLinks">
+    <span class="nav-slider" id="navSlider"></span>
+    <a href="home.html" class="nav-item">Home</a>
+    <a href="materials.html" class="nav-item">Buy</a>
+    <a href="rentitems.html" class="nav-item active">Rent</a>
+    <a href="listiteam.html" class="nav-item">List Items</a>
+    <a href="profile.html" class="nav-item cta">Profile</a>
+  </div>
+</nav>
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+  <div class="page-header-grid"></div>
+  <div class="page-header-inner">
+    <div class="page-tag">
+      <svg viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+      Tools &amp; Equipment
+    </div>
+    <h1>Rent What You Need</h1>
+    <p>Affordable daily rentals for your projects — no commitment, no clutter.</p>
+  </div>
+</div>
+
+<!-- FILTERS BAR -->
+<div class="filters-bar">
+  <div class="search-wrap">
+    <svg class="search-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    <input type="text" id="search" placeholder="Search tools, machines…" oninput="displayItems()">
+  </div>
+  <select class="filter-select" id="category" onchange="displayItems()">
+    <option value="all">All Categories</option>
+    <option value="tools">Tools</option>
+    <option value="machines">Machines</option>
+    <option value="rental">Rental</option>
+  </select>
+  <span class="results-count" id="resultsLine"></span>
+</div>
+
+<!-- GRID -->
+<div class="grid-wrap">
+  <div class="grid" id="itemList"></div>
+</div>
+
+<!-- RENT MODAL -->
+<div id="rentModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3 id="itemName">Item Name</h3>
+      <p>Enter rental duration below</p>
+      <button class="modal-close" onclick="closeModal()">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <label class="input-label" for="days">Number of Days</label>
+      <input type="number" id="days" placeholder="e.g. 3" min="1">
+      <div class="total-preview">
+        <span class="total-label">Estimated Total</span>
+        <span class="total-amount"><b>₹</b><span id="total">0</span></span>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-confirm" onclick="confirmRent()">Confirm Rental</button>
+        <button class="btn-cancel-modal" onclick="closeModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast" class="toast">
+  <div class="toast-icon">
+    <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+  </div>
+  <span id="toastMsg">Done!</span>
+</div>
+
+<script>
+let rented = JSON.parse(localStorage.getItem("rented")) || [];
+
+const BASE_ITEMS = [
+  { name: "Electric Drill",  price: 200, category: "machines", image: "https://encrypted-tbn1.gstatic.com/shopping?q=tbn:ANd9GcRqfcraWyF0sQoD9WIIiZ8VR4ftCBGWwJuCVPF8karN1FFYAG6EvPYCuU66ZUVJZNmCXMz6HuQkTEyCzkWHRt_ggbF-Bt2zFTQvjgqO5-w", isNew: false },
+  { name: "Screwdriver Set", price: 100, category: "tools",    image: "https://encrypted-tbn2.gstatic.com/shopping?q=tbn:ANd9GcQzNE3Hpdumu8nyBJmuPKoYZHTWs8Gklwo3fQtMnyXARthK_jxWiy_19tEdwY6VZWW82GFOqyZQ5BP16cFkjhev18gMhbzoQmcMqnAmhoObo0wvCCGUbvs8", isNew: false },
+  { name: "Cement Mixer",    price: 2000, category: "machines", image: "https://cpimg.tistatic.com/05903743/b/4/Portable-Cement-Concrete-Mixer.jpg", isNew: false }
+];
+
+function getAllItems() {
+  const listed = JSON.parse(localStorage.getItem("listedItems")) || [];
+  const normalisedListed = listed
+    .filter(item => item && item.name && item.price)
+    .map(item => ({
+      name:     item.name     || "Unnamed Item",
+      price:    parseInt(item.price) || 0,
+      category: (item.category || item.type || "rental").toLowerCase(),
+      image:    item.image    || "https://via.placeholder.com/400x300/eafaf1/27ae60?text=No+Image",
+      isNew:    true
+    }));
+  return [...BASE_ITEMS, ...normalisedListed];
+}
+
+/* ── DISPLAY ── */
+function displayItems() {
+  const container = document.getElementById("itemList");
+  const search    = document.getElementById("search").value.toLowerCase();
+  const category  = document.getElementById("category").value;
+  const allItems  = getAllItems();
+
+  container.innerHTML = "";
+
+  const filtered = allItems.filter(item =>
+    item.name.toLowerCase().includes(search) &&
+    (category === "all" || item.category === category)
+  );
+
+  document.getElementById("resultsLine").textContent =
+    filtered.length + " item" + (filtered.length !== 1 ? "s" : "") + " found";
+
+  if (filtered.length === 0) {
+    container.innerHTML = `
+      <div class="empty">
+        <div class="empty-icon"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></div>
+        <h3>No items found</h3>
+        <p>Try a different keyword or category.</p>
+      </div>`;
+    return;
+  }
+
+  filtered.forEach((item, idx) => {
+    const newBadge = item.isNew ? `<span class="card-new-badge">New</span>` : '';
+    container.innerHTML += `
+    <div class="card" data-idx="${idx}">
+      <div class="card-img-wrap">
+        <img src="${item.image}" alt="${item.name}" loading="lazy"
+             onerror="this.src='https://via.placeholder.com/400x300/eafaf1/27ae60?text=No+Image'">
+        <span class="card-tag">${item.category}</span>
+        ${newBadge}
+      </div>
+      <div class="card-body">
+        <h4>${item.name}</h4>
+        <div class="price-row">
+          <span class="price"><b>&#8377;</b>${item.price.toLocaleString('en-IN')}</span>
+          <span class="price-unit">/ day</span>
+        </div>
+        <button class="btn-rent" onclick="openRentModal('${item.name.replace(/'/g,"\\'")}',${item.price},'${item.image.replace(/'/g,"\\'")}')">
+          <svg width="14" height="14" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          Rent Now
+        </button>
+      </div>
+    </div>`;
+  });
+
+  attachDropInObserver();
+}
+
+/* ── FLOATING DROP-IN OBSERVER ── */
+function attachDropInObserver() {
+  const cards = document.querySelectorAll(".card:not(.drop-in)");
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) return;
+      const card = entry.target;
+      const idx  = parseInt(card.getAttribute("data-idx")) || 0;
+
+      // stagger 130ms per card so they land one after another
+      setTimeout(() => {
+        card.classList.add("drop-in");
+      }, (idx % 4) * 130);
+
+      observer.unobserve(card);
+    });
+  }, {
+    threshold: 0.10,
+    rootMargin: "0px 0px -30px 0px"
+  });
+
+  cards.forEach(card => observer.observe(card));
+}
+
+/* ── MODAL ── */
+let selectedItem = {};
+
+function openRentModal(name, price, image) {
+  selectedItem = { name, price, image };
+  document.getElementById("itemName").innerText = name;
+  document.getElementById("days").value = "";
+  document.getElementById("total").innerText = "0";
+  document.getElementById("rentModal").style.display = "flex";
+}
+
+function closeModal() {
+  document.getElementById("rentModal").style.display = "none";
+}
+
+document.getElementById("days").addEventListener("input", function () {
+  const days = parseInt(this.value) || 0;
+  document.getElementById("total").innerText = (days * selectedItem.price).toLocaleString('en-IN');
+});
+
+function confirmRent() {
+  const days = parseInt(document.getElementById("days").value);
+  if (!days || days <= 0) { showToast("Please enter a valid number of days."); return; }
+  rented.push({ ...selectedItem, rentDays: days, total: days * selectedItem.price, date: new Date().toLocaleString() });
+  localStorage.setItem("rented", JSON.stringify(rented));
+  showToast(selectedItem.name + " rented for " + days + " day" + (days !== 1 ? "s" : "") + ".");
+  closeModal();
+}
+
+function showToast(msg) {
+  const t = document.getElementById("toast");
+  document.getElementById("toastMsg").innerText = msg;
+  t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 2800);
+}
+
+document.getElementById("rentModal").addEventListener("click", function(e) {
+  if (e.target === this) closeModal();
+});
+
+displayItems();
+</script>
+<script>const progressBar = document.getElementById('scrollProgress');
+
+window.addEventListener('scroll', () => {
+  const scrollY = window.scrollY;
+  const docH    = document.documentElement.scrollHeight - window.innerHeight;
+  const pct     = docH > 0 ? (scrollY / docH) * 100 : 0;
+  progressBar.style.width = pct.toFixed(1) + '%';
+}, { passive: true });</script>
+<script src="transition.js"></script>
+</body>
+</html>

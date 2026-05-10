@@ -1,0 +1,19 @@
+body {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 0.35s ease, transform 0.35s ease;
+}
+
+body.transition-enter {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+body.transition-exit {
+  opacity: 0;
+  transform: translateY(-22px);
+}
+
+body.transitioning {
+  pointer-events: none;
+}

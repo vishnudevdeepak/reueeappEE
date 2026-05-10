@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>ReuseMart - Home</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="transition.css">
+
+<style>
+  .scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  width: 0%;
+  background: linear-gradient(90deg, #27ae60, #2ecc71);
+  z-index: 9999;
+  transition: width 0.05s linear;
+  box-shadow: 0 0 8px rgba(39, 174, 96, 0.6);
+}
+:root {
+  --green: #27ae60;
+  --green-light: #2ecc71;
+  --green-dark: #1e8449;
+  --green-pale: #eafaf1;
+  --green-mid: #d5f5e3;
+  --white: #ffffff;
+  --bg: #f4f8f6;
+  --text: #1a2e22;
+  --muted: #6b8f78;
+  --card-shadow: 0 8px 32px rgba(39,174,96,0.10);
+}
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  background: linear-gradient(135deg, #d4f5e9, #f4f8f6);
+  font-family: 'DM Sans', sans-serif;
+  color: var(--text);
+  overflow-x: hidden;
+}
+
+/* ── NAVBAR ── */
+.navbar {
+  background: rgba(255,255,255,0.25);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  padding: 18px 60px;
+  height: 68px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  border-bottom: 1px solid rgba(255,255,255,0.30);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.05);
+  transition: padding 0.35s ease, background 0.35s ease, transform 0.35s ease;
+}
+
+.navbar.shrink {
+  padding: 10px 60px;
+  background: rgba(255,255,255,0.45);
+  backdrop-filter: blur(18px);
+}
+
+.navbar.hide { transform: translateY(-100%); }
+
+.logo { display: flex; align-items: center; gap: 10px; }
+.logo h2 {
+  font-family: 'Playfair Display', serif;
+  color: var(--green-dark);
+  font-size: 22px;
+  letter-spacing: -0.5px;
+  transition: font-size 0.3s;
+}
+.navbar.shrink .logo h2 { font-size: 18px; }
+
+.nav-links {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transform: translateX(120px);
+  opacity: 0;
+  animation: slideInRight 0.8s cubic-bezier(0.22,1,0.36,1) 0.3s forwards;
+}
+
+.nav-slider {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  height: 38px;
+  width: 0;
+  transform: translateY(-50%);
+  background: rgba(39,174,96,0.14);
+  border-radius: 999px;
+  border: 1px solid rgba(39,174,96,0.22);
+  transition: left 0.28s cubic-bezier(.22,.68,0,1.2), width 0.28s cubic-bezier(.22,.68,0,1.2);
+  pointer-events: none;
+  z-index: 0;
+}
+
+@keyframes slideInRight {
+  to { transform: translateX(0); opacity: 1; }
+}
+
+.nav-item {
+  position: relative;
+  z-index: 1;
+  text-decoration: none;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 500;
+  padding: 7px 16px;
+  border-radius: 10px;
+  transition: color 0.22s ease;
+}
+
+.nav-item:hover {
+  color: var(--green-dark);
+}
+
+.nav-item.active {
+  color: var(--green-dark);
+  font-weight: 600;
+}
+
+.nav-item.cta {
+  margin-left: 6px;
+}
+
+/* ── HERO ── */
+.hero {
+  min-height: 88vh;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: linear-gradient(135deg, #0d3320 0%, #1a6b3c 50%, #27ae60 100%);
+}
+
+.hero-bg-circles { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+.hero-bg-circles span {
+  position: absolute; border-radius: 50%;
+  background: rgba(46,204,113,0.12);
+  animation: floatCircle 8s ease-in-out infinite;
+}
+.hero-bg-circles span:nth-child(1) { width: 500px; height: 500px; top: -120px; right: -100px; animation-delay: 0s; }
+.hero-bg-circles span:nth-child(2) { width: 300px; height: 300px; bottom: -80px; left: 5%; animation-delay: 2s; background: rgba(39,174,96,0.15); }
+.hero-bg-circles span:nth-child(3) { width: 180px; height: 180px; top: 40%; right: 25%; animation-delay: 4s; }
+
+@keyframes floatCircle {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-22px) scale(1.04); }
+}
+
+.hero-grid-lines {
+  position: absolute; inset: 0;
+  background-image: linear-gradient(rgba(46,204,113,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(46,204,113,0.06) 1px, transparent 1px);
+  background-size: 60px 60px;
+  pointer-events: none;
+}
+
+.hero-content {
+  position: relative;
+  text-align: center;
+  color: white;
+  padding: 40px 20px;
+  max-width: 680px;
+  animation: heroIn 0.9s cubic-bezier(.22,.68,0,1.2) both;
+}
+
+@keyframes heroIn {
+  from { opacity: 0; transform: translateY(36px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 7px;
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.22);
+  backdrop-filter: blur(8px);
+  padding: 7px 18px; border-radius: 100px;
+  font-size: 13px; font-weight: 500; letter-spacing: 0.04em;
+  margin-bottom: 26px; color: rgba(255,255,255,0.92);
+}
+
+.hero h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(36px, 6vw, 58px);
+  line-height: 1.12; margin-bottom: 18px; letter-spacing: -1px;
+}
+
+.hero h1 em {
+  font-style: normal;
+  background: linear-gradient(90deg, #a8f5c8, #2ecc71);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+
+.hero p { font-size: 17px; color: rgba(255,255,255,0.75); margin-bottom: 36px; font-weight: 300; line-height: 1.65; }
+
+.hero-btns { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+
+.btn-primary {
+  padding: 14px 34px; border-radius: 12px; background: white; color: var(--green-dark);
+  font-weight: 700; font-size: 15px; border: none; cursor: pointer;
+  transition: all 0.25s; box-shadow: 0 8px 28px rgba(0,0,0,0.20);
+}
+.btn-primary:hover { transform: translateY(-3px); box-shadow: 0 14px 36px rgba(0,0,0,0.28); }
+
+.btn-outline {
+  padding: 14px 30px; border-radius: 12px; background: transparent; color: white;
+  font-weight: 600; font-size: 15px; border: 2px solid rgba(255,255,255,0.38); cursor: pointer; transition: all 0.25s;
+}
+.btn-outline:hover { background: rgba(255,255,255,0.10); border-color: rgba(255,255,255,0.65); transform: translateY(-2px); }
+
+.hero-stats {
+  display: flex; justify-content: center; gap: 40px;
+  margin-top: 54px; padding-top: 34px;
+  border-top: 1px solid rgba(255,255,255,0.12);
+}
+.stat { text-align: center; }
+.stat-num { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 700; color: #a8f5c8; }
+.stat-label { font-size: 12px; color: rgba(255,255,255,0.55); margin-top: 3px; letter-spacing: 0.06em; text-transform: uppercase; }
+
+/* ── SECTION ── */
+.section { padding: 70px 60px; }
+
+.section-header {
+  display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 36px;
+}
+.section-header h2 { font-family: 'Playfair Display', serif; font-size: 30px; color: var(--text); letter-spacing: -0.5px; }
+.section-header a { color: var(--green); font-size: 14px; font-weight: 600; text-decoration: none; display: flex; align-items: center; gap: 5px; transition: gap 0.2s; }
+.section-header a:hover { gap: 9px; }
+
+.section-tag {
+  display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: 0.10em;
+  text-transform: uppercase; color: var(--green); background: var(--green-pale);
+  border: 1px solid var(--green-mid); padding: 4px 12px; border-radius: 100px; margin-bottom: 10px;
+}
+
+/* ── FEATURES ── */
+.features-section { background: white; padding: 60px; }
+.features { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
+
+.feature-box {
+  background: var(--bg); padding: 28px 24px; border-radius: 16px;
+  text-align: center; border: 1px solid rgba(39,174,96,0.10);
+  transition: all 0.28s ease; cursor: default;
+}
+.feature-box:hover {
+  background: var(--green-pale); border-color: rgba(39,174,96,0.25);
+  transform: translateY(-4px); box-shadow: 0 12px 32px rgba(39,174,96,0.12);
+}
+.feature-icon { font-size: 32px; margin-bottom: 12px; display: block; }
+.feature-box h3 { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+.feature-box p { font-size: 13px; color: var(--muted); line-height: 1.55; }
+
+/* ── GRID & CARDS ── */
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 24px; perspective: 1200px; }
+
+.card {
+  background: white;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: var(--card-shadow);
+  border: 1px solid rgba(39,174,96,0.06);
+  position: relative;
+
+  /* === FLOATING DROP-IN: start state === */
+  opacity: 0;
+  transform: perspective(1000px) translateY(-60px) translateZ(80px) rotateX(-18deg) scale(0.92);
+  filter: blur(4px);
+  transition:
+    opacity   0.75s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.75s cubic-bezier(0.22, 1, 0.36, 1),
+    filter    0.55s ease,
+    box-shadow 0.30s ease;
+}
+
+/* === FLOATING DROP-IN: landed state === */
+.card.drop-in {
+  opacity: 1;
+  transform: perspective(1000px) translateY(0) translateZ(0) rotateX(0deg) scale(1);
+  filter: blur(0);
+}
+
+/* subtle bounce: overshoot then settle */
+.card.drop-in { animation: softLanding 0.75s cubic-bezier(0.22, 1, 0.36, 1) both; }
+
+@keyframes softLanding {
+  0%   { transform: perspective(1000px) translateY(-60px) translateZ(80px) rotateX(-18deg) scale(0.92); opacity: 0; filter: blur(4px); }
+  55%  { transform: perspective(1000px) translateY(6px)   translateZ(-6px)  rotateX(2deg)  scale(1.01); opacity: 1; filter: blur(0); }
+  75%  { transform: perspective(1000px) translateY(-3px)  translateZ(2px)   rotateX(-1deg) scale(0.995); }
+  100% { transform: perspective(1000px) translateY(0)     translateZ(0)     rotateX(0deg)  scale(1); }
+}
+
+/* hover lift (only after landed) */
+.card.drop-in:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 22px 52px rgba(39,174,96,0.18);
+  border-color: rgba(39,174,96,0.20);
+}
+
+.card-img-wrap { position: relative; overflow: hidden; height: 170px; }
+.card-img-wrap img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.40s ease; }
+.card.drop-in:hover .card-img-wrap img { transform: scale(1.07); }
+
+.card-badge {
+  position: absolute; top: 12px; left: 12px;
+  background: white; color: var(--green-dark);
+  font-size: 11px; font-weight: 700; padding: 4px 10px;
+  border-radius: 100px; letter-spacing: 0.04em;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.10);
+}
+
+.content { padding: 18px; }
+.content h4 { font-size: 16px; font-weight: 600; margin-bottom: 6px; color: var(--text); }
+.content .desc { font-size: 13px; color: var(--muted); margin-bottom: 12px; line-height: 1.5; }
+
+.card-footer { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+
+.price { font-family: 'Playfair Display', serif; color: var(--green-dark); font-size: 20px; font-weight: 700; }
+
+.cart-btn {
+  flex: 1; padding: 10px 16px; border: none; border-radius: 10px;
+  background: linear-gradient(135deg, var(--green), var(--green-light));
+  color: white; font-weight: 600; font-size: 13px; cursor: pointer;
+  transition: all 0.22s; box-shadow: 0 4px 14px rgba(39,174,96,0.28);
+  font-family: 'DM Sans', sans-serif;
+}
+.cart-btn:hover {
+  background: linear-gradient(135deg, var(--green-dark), var(--green));
+  transform: translateY(-2px); box-shadow: 0 7px 20px rgba(39,174,96,0.38);
+}
+
+/* ── BANNER ── */
+.banner {
+  margin: 0 60px 60px; border-radius: 22px;
+  background: linear-gradient(120deg, #0d3320, #27ae60);
+  padding: 50px 60px;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 24px; flex-wrap: wrap; position: relative; overflow: hidden;
+}
+.banner-text h3 { font-family: 'Playfair Display', serif; font-size: 26px; color: white; margin-bottom: 8px; }
+.banner-text p { color: rgba(255,255,255,0.70); font-size: 15px; }
+.banner-btn {
+  padding: 14px 32px; border-radius: 12px; border: 2px solid white;
+  background: transparent; color: white; font-size: 15px; font-weight: 700;
+  cursor: pointer; transition: all 0.25s; white-space: nowrap;
+  font-family: 'DM Sans', sans-serif;
+}
+.banner-btn:hover { background: white; color: var(--green-dark); transform: translateY(-2px); }
+
+/* ── FOOTER ── */
+.footer {
+  background: white; border-top: 1px solid rgba(39,174,96,0.10);
+  padding: 28px 60px;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 14px;
+}
+.footer-logo { font-family: 'Playfair Display', serif; color: var(--green-dark); font-size: 18px; }
+.footer p { color: var(--muted); font-size: 13px; }
+
+/* ── TOAST ── */
+.toast {
+  position: fixed; bottom: 30px; right: 30px;
+  background: var(--text); color: white;
+  padding: 14px 22px; border-radius: 12px;
+  font-size: 14px; font-weight: 500;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+  transform: translateY(80px); opacity: 0;
+  transition: all 0.35s cubic-bezier(.22,.68,0,1.2);
+  z-index: 999; display: flex; align-items: center; gap: 10px;
+}
+.toast.show { transform: translateY(0); opacity: 1; }
+.toast-icon {
+  background: var(--green); width: 24px; height: 24px;
+  border-radius: 50%; display: flex; align-items: center;
+  justify-content: center; font-size: 13px; flex-shrink: 0;
+}
+
+/* ── SECTION-LEVEL FLOAT-IN (for non-card elements) ── */
+.float-in {
+  opacity: 0;
+  transform: translateY(-40px) scale(0.97);
+  filter: blur(3px);
+  transition: opacity 0.7s cubic-bezier(0.22,1,0.36,1), transform 0.7s cubic-bezier(0.22,1,0.36,1), filter 0.5s ease;
+}
+.float-in.landed {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  filter: blur(0);
+}
+
+@media (max-width: 768px) {
+  .navbar { padding: 0 20px; }
+  .navbar.shrink { padding: 6px 20px; }
+  .section { padding: 50px 20px; }
+  .features-section { padding: 50px 20px; }
+  .banner { margin: 0 20px 50px; padding: 36px 28px; }
+  .footer { padding: 24px 20px; flex-direction: column; text-align: center; }
+  .hero-stats { gap: 24px; }
+  .section-header { flex-direction: column; align-items: flex-start; gap: 10px; }
+}
+</style>
+</head>
+
+<body>
+<div class="scroll-progress" id="scrollProgress"></div>
+<!-- NAVBAR -->
+<nav class="navbar glass" id="navbar">
+  <div class="logo">
+    <h2>ReuseMart</h2>
+  </div>
+  <div class="nav-links" id="navLinks">
+    <span class="nav-slider" id="navSlider"></span>
+    <a href="home.html" class="nav-item active">Home</a>
+    <a href="materials.html" class="nav-item">Buy</a>
+    <a href="rentitems.html" class="nav-item">Rent</a>
+    <a href="listiteam.html" class="nav-item">List Items</a>
+    <a href="profile.html" class="nav-item cta">Profile</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg-circles"><span></span><span></span><span></span></div>
+  <div class="hero-grid-lines"></div>
+  <div class="hero-content">
+    <div class="hero-badge">Sustainable Marketplace</div>
+    <h1>Give Items a<br><em>Second Life</em></h1>
+    <p>Buy, sell, and rent pre-loved items easily within your community. Save money, reduce waste.</p>
+    <div class="hero-btns">
+      <button class="btn-primary" onclick="navigateTo('materials.html')">Start Shopping</button>
+      <button class="btn-outline" onclick="navigateTo('rentitems.html')">Browse Rentals</button>
+    </div>
+    <div class="hero-stats">
+      <div class="stat"><div class="stat-num"></div><div class="stat-label">Happy Users</div></div>
+      <div class="stat"><div class="stat-num"></div><div class="stat-label">Total Saved</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ITEMS -->
+<section class="section">
+  <div class="section-tag float-in">Popular Right Now</div>
+  <div class="section-header float-in">
+    <h2>Featured Items</h2>
+    <a href="materials.html">View all →</a>
+  </div>
+
+  <div class="grid">
+
+    <div class="card">
+      <div class="card-img-wrap">
+        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTAIEPxoDU1G1uMBCTT_OedXVxZUYrs0J_AwA&s" alt="Cement Bags">
+        <span class="card-badge">In Stock</span>
+      </div>
+      <div class="content">
+        <h4>Cement Bags</h4>
+        <p class="desc">Premium quality, lightly used construction cement.</p>
+        <div class="card-footer">
+          <span class="price">₹500</span>
+          <button class="cart-btn" onclick="addToCart('Cement Bags','500','https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTAIEPxoDU1G1uMBCTT_OedXVxZUYrs0J_AwA&s')">Add to Cart</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-img-wrap">
+        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSUKcVJ5Fpl1TzRHn3et3QqZZtcdJoYJFgrwA&s" alt="Bricks">
+        <span class="card-badge">Popular</span>
+      </div>
+      <div class="content">
+        <h4>Bricks</h4>
+        <p class="desc">Solid red bricks, ideal for construction.</p>
+        <div class="card-footer">
+          <span class="price">₹5000</span>
+          <button class="cart-btn" onclick="addToCart('Bricks','5000','https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSUKcVJ5Fpl1TzRHn3et3QqZZtcdJoYJFgrwA&s')">Add to Cart</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-img-wrap">
+        <img src="https://www.autodesk.com/blogs/construction/wp-content/uploads/2024/07/steel-conmon-construction-material.jpg" alt="Steel">
+        <span class="card-badge">New</span>
+      </div>
+      <div class="content">
+        <h4>Steel</h4>
+        <p class="desc">Structural steel rods, certified and ready.</p>
+        <div class="card-footer">
+          <span class="price">₹1500</span>
+          <button class="cart-btn" onclick="addToCart('Steel','1500','https://www.autodesk.com/blogs/construction/wp-content/uploads/2024/07/steel-conmon-construction-material.jpg')">Add to Cart</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- BANNER -->
+<div class="banner float-in">
+  <div class="banner-text">
+    <h3>Have something to give away?</h3>
+    <p>Try selling it through our online platform</p>
+  </div>
+  <button class="banner-btn" onclick="navigateTo('listiteam.html')">List an Item →</button>
+</div>
+
+<!-- FOOTER -->
+<footer class="footer float-in">
+  <div class="footer-logo">ReuseMart</div>
+  <p></p>
+</footer>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <div class="toast-icon">✓</div>
+  <span id="toast-msg">Item added to cart!</span>
+</div>
+
+<script>
+/* ── CART ── */
+function addToCart(name, price, image) {
+  let cart = JSON.parse(localStorage.getItem("cart")) || [];
+  cart.push({ name, price, image });
+  localStorage.setItem("cart", JSON.stringify(cart));
+  showToast(name + ' added to cart!');
+}
+
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  document.getElementById('toast-msg').textContent = msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2800);
+}
+
+/* ── NAVBAR SCROLL BEHAVIOUR ── */
+let lastScroll = 0;
+const navbar = document.getElementById("navbar");
+
+window.addEventListener("scroll", () => {
+  const current = window.scrollY;
+  navbar.classList.toggle("shrink", current > 50);
+  navbar.classList.toggle("hide", current > lastScroll && current > 80);
+  lastScroll = current;
+});
+
+/* ── FLOATING DROP-IN OBSERVER ── */
+// Cards: staggered, 3D drop with soft landing
+const cardObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (!entry.isIntersecting) return;
+
+    const grid  = entry.target;
+    const cards = grid.querySelectorAll(".card");
+
+    cards.forEach((card, i) => {
+      setTimeout(() => {
+        card.classList.add("drop-in");
+      }, i * 130); // stagger: 130ms per card
+    });
+
+    cardObserver.unobserve(grid);
+  });
+}, { threshold: 0.12 });
+
+document.querySelectorAll(".grid").forEach(g => cardObserver.observe(g));
+
+// Generic float-in for section tags, headers, banner, footer
+const floatObserver = new IntersectionObserver((entries) => {
+  entries.forEach((entry, idx) => {
+    if (!entry.isIntersecting) return;
+    setTimeout(() => {
+      entry.target.classList.add("landed");
+    }, 80);
+    floatObserver.unobserve(entry.target);
+  });
+}, { threshold: 0.15 });
+
+document.querySelectorAll(".float-in").forEach(el => floatObserver.observe(el));
+</script>
+<script>const progressBar = document.getElementById('scrollProgress');
+
+window.addEventListener('scroll', () => {
+  const scrollY = window.scrollY;
+  const docH    = document.documentElement.scrollHeight - window.innerHeight;
+  const pct     = docH > 0 ? (scrollY / docH) * 100 : 0;
+  progressBar.style.width = pct.toFixed(1) + '%';
+}, { passive: true });</script>
+<script src="transition.js"></script>
+</body>
+</html>
